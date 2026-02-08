@@ -208,6 +208,21 @@ impl FunctionGenerator {
                 let array = &args[0];
                 quote!(#array.is_empty())
             }
+            // Type checking functions
+            "is_null" => {
+                if args.is_empty() {
+                    return quote!();
+                }
+                let value = &args[0];
+                quote!(#value.is_none())
+            }
+            "is_some" => {
+                if args.is_empty() {
+                    return quote!();
+                }
+                let value = &args[0];
+                quote!(#value.is_some())
+            }
             _ => quote!(),
         }
     }
