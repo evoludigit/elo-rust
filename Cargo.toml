@@ -1,0 +1,53 @@
+[package]
+name = "elo-rust"
+version = "0.1.0"
+edition = "2021"
+authors = ["FraiseQL Project"]
+description = "Rust code generation target for ELO validation language"
+license = "MIT"
+repository = "https://github.com/blambeau/elo"
+keywords = ["validation", "elo", "code-generation", "rust"]
+categories = ["development-tools::procedural-macro-helpers"]
+
+[lib]
+name = "elo_rust"
+path = "src/lib.rs"
+
+[[example]]
+name = "simple_validator"
+path = "examples/simple_validator.rs"
+
+[dependencies]
+# AST and parsing support
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+
+# Standard library support
+regex = "1.10"
+chrono = "0.4"
+
+# For testing and examples
+serde = { version = "1.0", optional = true }
+serde_json = { version = "1.0", optional = true }
+
+[dev-dependencies]
+criterion = "0.5"
+tokio = { version = "1", features = ["full"] }
+actix-web = "4"
+axum = "0.7"
+
+[features]
+default = ["runtime"]
+runtime = []
+serde-support = ["serde", "serde_json"]
+
+# Benchmarks added in Phase 2
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.bench]
+inherits = "release"
