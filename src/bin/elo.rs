@@ -213,7 +213,7 @@ fn write_file_safe(path: &std::path::Path, content: &str) -> io::Result<()> {
     #[cfg(not(unix))]
     {
         // On non-Unix systems, use standard write
-        fs::write(path, content)
+        std::fs::write(path, content)
     }
 }
 
