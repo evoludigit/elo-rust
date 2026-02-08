@@ -8,7 +8,7 @@
 //! - Age is at least 18
 //! - Username is between 3 and 20 characters
 
-use actix_web::{post, web, App, HttpResponse, HttpServer, middleware};
+use actix_web::{middleware, post, web, App, HttpResponse, HttpServer};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -37,9 +37,7 @@ pub struct ValidationErrors {
 
 impl ValidationErrors {
     pub fn new() -> Self {
-        Self {
-            errors: Vec::new(),
-        }
+        Self { errors: Vec::new() }
     }
 
     pub fn add_error(&mut self, field: &str, message: &str) {

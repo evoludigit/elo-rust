@@ -16,13 +16,11 @@ impl ExpressionGenerator {
 
     /// Generate code for a simple literal
     pub fn literal(&self, _value: &str) -> TokenStream {
-        // Phase 2 implementation
         quote::quote!()
     }
 
     /// Generate code for field access (e.g., user.age)
     pub fn field_access(&self, _receiver: &str, _field: &str) -> TokenStream {
-        // Phase 2 implementation
         quote::quote!()
     }
 
@@ -33,7 +31,6 @@ impl ExpressionGenerator {
         _left: TokenStream,
         _right: TokenStream,
     ) -> TokenStream {
-        // Phase 2 implementation
         quote::quote!()
     }
 }
