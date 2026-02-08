@@ -950,6 +950,7 @@ mod tests {
     // ============================================================================
 
     #[test]
+    #[cfg(unix)]
     fn test_path_validation_with_context() {
         // SECURITY FIX #5: Test path validation with CWD capture
         let result = validate_file_path_with_context("output.rs");
@@ -964,6 +965,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_verify_path_rejects_cwd_change() {
         // SECURITY FIX #5: Verify function detects CWD changes
         // We can't actually change CWD in a test, but we can verify the logic works

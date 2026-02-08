@@ -443,7 +443,7 @@ https://github.com/enspirit/elo
 
 ---
 
-**Version**: 0.4.0
+**Version**: 0.4.1
 **Status**: ✅ Production Ready
 **Last Updated**: February 8, 2026
 **Architecture**: ✅ Complete (8 phases)
