@@ -3,10 +3,13 @@
 //! This module provides the core code generation engine that transforms ELO AST
 //! into idiomatic Rust code via the `quote!` macro.
 
+pub mod errors;
 pub mod expressions;
 pub mod functions;
 pub mod operators;
 pub mod types;
+
+pub use errors::CodeGenError;
 
 use proc_macro2::TokenStream;
 
