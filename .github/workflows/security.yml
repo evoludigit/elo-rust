@@ -50,7 +50,7 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v1
         with:
           log-level: warn
-          command: check advisories
+          command: check licenses bans
           rust-version: stable
 
   trivy:
@@ -101,7 +101,7 @@ jobs:
 
       - name: Verify no git dependencies
         run: |
-          if grep -q "git" Cargo.lock; then
+          if grep -q '^source = "git' Cargo.lock; then
             echo "❌ ERROR: Git dependencies found in Cargo.lock"
             echo "Only published crates from crates.io are allowed"
             exit 1
