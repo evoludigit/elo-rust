@@ -38,9 +38,9 @@ impl Parser {
     /// ```
     pub fn parse(input: &str) -> Result<Expr, ParseError> {
         let mut lexer = Lexer::new(input);
-        let tokens = lexer.tokenize().map_err(|err| {
-            ParseError::new(err.message, err.line, err.column)
-        })?;
+        let tokens = lexer
+            .tokenize()
+            .map_err(|err| ParseError::new(err.message, err.line, err.column))?;
         let mut parser = Parser::new(tokens);
         parser.parse_expression()
     }
@@ -288,11 +288,7 @@ impl Parser {
                             };
                         }
                         _ => {
-                            return Err(ParseError::new(
-                                "Expected field name after '.'",
-                                1,
-                                1,
-                            ));
+                            return Err(ParseError::new("Expected field name after '.'", 1, 1));
                         }
                     }
                 }
@@ -521,13 +517,7 @@ impl Parser {
 
         let name = match self.advance() {
             Token::Identifier(n) => n,
-            _ => {
-                return Err(ParseError::new(
-                    "Expected variable name after 'let'",
-                    1,
-                    1,
-                ))
-            }
+            _ => return Err(ParseError::new("Expected variable name after 'let'", 1, 1)),
         };
 
         self.expect(Token::Equal)?;
@@ -562,13 +552,7 @@ impl Parser {
 
         let param = match self.advance() {
             Token::Identifier(p) => p,
-            _ => {
-                return Err(ParseError::new(
-                    "Expected parameter name in lambda",
-                    1,
-                    1,
-                ))
-            }
+            _ => return Err(ParseError::new("Expected parameter name in lambda", 1, 1)),
         };
 
         self.expect(Token::LambdaArrow)?;
@@ -601,8 +585,8 @@ mod tests {
 
     #[test]
     fn test_parse_float() {
-        let expr = Parser::parse("3.14").unwrap();
-        assert_eq!(expr, Expr::Literal(Literal::Float(3.14)));
+        let expr = Parser::parse("3.15").unwrap();
+        assert_eq!(expr, Expr::Literal(Literal::Float(3.15)));
     }
 
     #[test]
@@ -621,7 +605,10 @@ mod tests {
     fn test_parse_binary_op() {
         let expr = Parser::parse("1 + 2").unwrap();
         match expr {
-            Expr::BinaryOp { op: BinaryOperator::Add, .. } => {}
+            Expr::BinaryOp {
+                op: BinaryOperator::Add,
+                ..
+            } => {}
             _ => panic!("Expected binary add operation"),
         }
     }

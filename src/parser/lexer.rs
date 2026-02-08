@@ -315,7 +315,8 @@ impl<'a> Lexer<'a> {
         }
 
         if is_float {
-            num_str.parse::<f64>()
+            num_str
+                .parse::<f64>()
                 .map(Token::Float)
                 .map_err(|_| LexError {
                     message: format!("Invalid float: {}", num_str),
@@ -323,7 +324,8 @@ impl<'a> Lexer<'a> {
                     column: start_col,
                 })
         } else {
-            num_str.parse::<i64>()
+            num_str
+                .parse::<i64>()
                 .map(Token::Integer)
                 .map_err(|_| LexError {
                     message: format!("Invalid integer: {}", num_str),
@@ -649,9 +651,9 @@ mod tests {
 
     #[test]
     fn test_float_literal() {
-        let mut lexer = Lexer::new("3.14");
+        let mut lexer = Lexer::new("3.15");
         let token = lexer.next_token().unwrap();
-        assert_eq!(token, Token::Float(3.14));
+        assert_eq!(token, Token::Float(3.15));
     }
 
     #[test]
@@ -768,7 +770,12 @@ mod tests {
         let tokens = lexer.tokenize().unwrap();
         assert_eq!(
             tokens,
-            vec![Token::Integer(42), Token::Plus, Token::Integer(3), Token::Eof]
+            vec![
+                Token::Integer(42),
+                Token::Plus,
+                Token::Integer(3),
+                Token::Eof
+            ]
         );
     }
 

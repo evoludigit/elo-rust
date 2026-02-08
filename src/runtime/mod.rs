@@ -2,11 +2,11 @@
 //!
 //! Provides error types, utilities, and dynamic value representation for generated validators
 
-pub mod value;
 pub mod temporal;
+pub mod value;
 
-pub use value::EloValue;
 pub use temporal::TemporalValue;
+pub use value::EloValue;
 
 use std::fmt;
 

@@ -99,13 +99,12 @@ impl EloValue {
             EloValue::Boolean(b) => b.to_string(),
             EloValue::Null => "null".to_string(),
             EloValue::Array(arr) => {
-                let elements: Vec<String> = arr.iter()
-                    .map(|v| v.to_string_value())
-                    .collect();
+                let elements: Vec<String> = arr.iter().map(|v| v.to_string_value()).collect();
                 format!("[{}]", elements.join(", "))
             }
             EloValue::Object(obj) => {
-                let pairs: Vec<String> = obj.iter()
+                let pairs: Vec<String> = obj
+                    .iter()
                     .map(|(k, v)| format!("{}: {}", k, v.to_string_value()))
                     .collect();
                 format!("{{{}}}", pairs.join(", "))
@@ -288,12 +287,8 @@ impl EloValue {
                 }
             }
             (EloValue::Float(a), EloValue::Float(b)) => Ok(EloValue::Float(a.powf(*b))),
-            (EloValue::Integer(a), EloValue::Float(b)) => {
-                Ok(EloValue::Float((*a as f64).powf(*b)))
-            }
-            (EloValue::Float(a), EloValue::Integer(b)) => {
-                Ok(EloValue::Float(a.powf(*b as f64)))
-            }
+            (EloValue::Integer(a), EloValue::Float(b)) => Ok(EloValue::Float((*a as f64).powf(*b))),
+            (EloValue::Float(a), EloValue::Integer(b)) => Ok(EloValue::Float(a.powf(*b as f64))),
             _ => Err(format!(
                 "Cannot raise {} to power of {}",
                 self.type_name(),
@@ -446,11 +441,11 @@ mod tests {
     #[test]
     fn test_type_conversion() {
         let i = EloValue::Integer(42);
-        let f = EloValue::Float(3.14);
+        let f = EloValue::Float(3.15);
         let s = EloValue::String("123".to_string());
 
         assert_eq!(i.to_integer(), Some(42));
-        assert_eq!(f.to_float(), Some(3.14));
+        assert_eq!(f.to_float(), Some(3.15));
         assert_eq!(s.to_integer(), Some(123));
     }
 

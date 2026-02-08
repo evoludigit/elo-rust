@@ -2,17 +2,24 @@
 //!
 //! Tests cover let, if, lambda, pipe, guard expressions and their combinations
 
+use elo_rust::ast::{BinaryOperator, Expr, Literal};
 use elo_rust::parser::Parser;
-use elo_rust::ast::{Expr, BinaryOperator, Literal};
 
 #[test]
 fn test_parse_let_simple() {
     let expr = Parser::parse("let x = 10 in x + 5").expect("Failed to parse");
     match expr {
-        Expr::Let { name, value: _, body } => {
+        Expr::Let {
+            name,
+            value: _,
+            body,
+        } => {
             assert_eq!(name, "x");
             match *body {
-                Expr::BinaryOp { op: BinaryOperator::Add, .. } => {}
+                Expr::BinaryOp {
+                    op: BinaryOperator::Add,
+                    ..
+                } => {}
                 _ => panic!("Expected addition in body"),
             }
         }
@@ -22,10 +29,11 @@ fn test_parse_let_simple() {
 
 #[test]
 fn test_parse_nested_let() {
-    let expr = Parser::parse("let x = 1 in let y = 2 in x + y")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let x = 1 in let y = 2 in x + y").expect("Failed to parse");
     match expr {
-        Expr::Let { name: outer_name, .. } => {
+        Expr::Let {
+            name: outer_name, ..
+        } => {
             assert_eq!(outer_name, "x");
         }
         _ => panic!("Expected outer let"),
@@ -34,8 +42,7 @@ fn test_parse_nested_let() {
 
 #[test]
 fn test_parse_if_simple() {
-    let expr = Parser::parse("if age > 18 then 1 else 0")
-        .expect("Failed to parse");
+    let expr = Parser::parse("if age > 18 then 1 else 0").expect("Failed to parse");
     match expr {
         Expr::If {
             condition,
@@ -44,7 +51,10 @@ fn test_parse_if_simple() {
         } => {
             // Check condition is a comparison
             match *condition {
-                Expr::BinaryOp { op: BinaryOperator::Gt, .. } => {}
+                Expr::BinaryOp {
+                    op: BinaryOperator::Gt,
+                    ..
+                } => {}
                 _ => panic!("Expected comparison"),
             }
             // Check branches are literals
@@ -59,8 +69,7 @@ fn test_parse_if_simple() {
 
 #[test]
 fn test_parse_if_with_complex_branches() {
-    let expr = Parser::parse("if verified then price * 0.9 else price")
-        .expect("Failed to parse");
+    let expr = Parser::parse("if verified then price * 0.9 else price").expect("Failed to parse");
     match expr {
         Expr::If { .. } => {}
         _ => panic!("Expected if expression"),
@@ -74,7 +83,10 @@ fn test_parse_lambda_simple() {
         Expr::Lambda { param, body } => {
             assert_eq!(param, "x");
             match *body {
-                Expr::BinaryOp { op: BinaryOperator::Mul, .. } => {}
+                Expr::BinaryOp {
+                    op: BinaryOperator::Mul,
+                    ..
+                } => {}
                 _ => panic!("Expected multiplication"),
             }
         }
@@ -88,11 +100,17 @@ fn test_parse_guard_simple() {
     match expr {
         Expr::Guard { condition, body } => {
             match *condition {
-                Expr::BinaryOp { op: BinaryOperator::Gt, .. } => {}
+                Expr::BinaryOp {
+                    op: BinaryOperator::Gt,
+                    ..
+                } => {}
                 _ => panic!("Expected comparison"),
             }
             match *body {
-                Expr::BinaryOp { op: BinaryOperator::Mul, .. } => {}
+                Expr::BinaryOp {
+                    op: BinaryOperator::Mul,
+                    ..
+                } => {}
                 _ => panic!("Expected multiplication"),
             }
         }
@@ -154,8 +172,7 @@ fn test_parse_object_literal() {
 
 #[test]
 fn test_parse_complex_nested() {
-    let expr = Parser::parse("let x = 5 in if x > 0 then x * 2 else 0")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let x = 5 in if x > 0 then x * 2 else 0").expect("Failed to parse");
     match expr {
         Expr::Let { name, .. } => {
             assert_eq!(name, "x");
@@ -174,8 +191,7 @@ fn test_parse_if_with_let_in_condition() {
 
 #[test]
 fn test_parse_function_call_in_let() {
-    let expr = Parser::parse("let name = 'john' in length(name)")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let name = 'john' in length(name)").expect("Failed to parse");
     match expr {
         Expr::Let { .. } => {}
         _ => panic!("Expected let"),
@@ -185,12 +201,11 @@ fn test_parse_function_call_in_let() {
 #[test]
 fn test_parse_multiple_pipes() {
     // Parser will create a single Pipe with all functions
-    let expr = Parser::parse("name |> uppercase() |> trim()")
-        .expect("Failed to parse");
+    let expr = Parser::parse("name |> uppercase() |> trim()").expect("Failed to parse");
     match expr {
         Expr::Pipe { functions, .. } => {
             // Should have 2 functions in the pipe
-            assert!(functions.len() >= 1);
+            assert!(!functions.is_empty());
         }
         _ => panic!("Expected pipe"),
     }
@@ -198,8 +213,7 @@ fn test_parse_multiple_pipes() {
 
 #[test]
 fn test_parse_let_with_function_call() {
-    let expr = Parser::parse("let len = length(x) in len > 5")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let len = length(x) in len > 5").expect("Failed to parse");
     match expr {
         Expr::Let { name, .. } => {
             assert_eq!(name, "len");
@@ -210,8 +224,8 @@ fn test_parse_let_with_function_call() {
 
 #[test]
 fn test_parse_guard_with_complex_body() {
-    let expr = Parser::parse("guard verified && active in price * discount")
-        .expect("Failed to parse");
+    let expr =
+        Parser::parse("guard verified && active in price * discount").expect("Failed to parse");
     match expr {
         Expr::Guard { .. } => {}
         _ => panic!("Expected guard"),
@@ -220,8 +234,7 @@ fn test_parse_guard_with_complex_body() {
 
 #[test]
 fn test_parse_lambda_with_complex_body() {
-    let expr = Parser::parse("fn(x ~> if x > 0 then x else 0)")
-        .expect("Failed to parse");
+    let expr = Parser::parse("fn(x ~> if x > 0 then x else 0)").expect("Failed to parse");
     match expr {
         Expr::Lambda { .. } => {}
         _ => panic!("Expected lambda"),
@@ -241,8 +254,7 @@ fn test_parse_array_with_expressions() {
 
 #[test]
 fn test_parse_object_with_expressions() {
-    let expr = Parser::parse("{sum: 1 + 2, product: 3 * 4}")
-        .expect("Failed to parse");
+    let expr = Parser::parse("{sum: 1 + 2, product: 3 * 4}").expect("Failed to parse");
     match expr {
         Expr::Object(fields) => {
             assert_eq!(fields.len(), 2);
@@ -253,48 +265,47 @@ fn test_parse_object_with_expressions() {
 
 #[test]
 fn test_parse_nested_if() {
-    let expr = Parser::parse("if x > 0 then if y > 0 then 1 else 2 else 3")
-        .expect("Failed to parse");
+    let expr =
+        Parser::parse("if x > 0 then if y > 0 then 1 else 2 else 3").expect("Failed to parse");
     match expr {
-        Expr::If { then_branch, .. } => {
-            match *then_branch {
-                Expr::If { .. } => {}
-                _ => panic!("Expected nested if"),
-            }
-        }
+        Expr::If { then_branch, .. } => match *then_branch {
+            Expr::If { .. } => {}
+            _ => panic!("Expected nested if"),
+        },
         _ => panic!("Expected if"),
     }
 }
 
 #[test]
 fn test_parse_let_in_if_branches() {
-    let expr = Parser::parse("if cond then let x = 1 in x else 0")
-        .expect("Failed to parse");
+    let expr = Parser::parse("if cond then let x = 1 in x else 0").expect("Failed to parse");
     match expr {
-        Expr::If { then_branch, .. } => {
-            match *then_branch {
-                Expr::Let { .. } => {}
-                _ => panic!("Expected let in then branch"),
-            }
-        }
+        Expr::If { then_branch, .. } => match *then_branch {
+            Expr::Let { .. } => {}
+            _ => panic!("Expected let in then branch"),
+        },
         _ => panic!("Expected if"),
     }
 }
 
 #[test]
 fn test_parse_operator_precedence_with_let() {
-    let expr = Parser::parse("let x = 1 in x + 2 * 3")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let x = 1 in x + 2 * 3").expect("Failed to parse");
     match expr {
         Expr::Let { body, .. } => {
             // Should be 1 + (2 * 3)
             match *body {
-                Expr::BinaryOp { op: BinaryOperator::Add, right, .. } => {
-                    match *right {
-                        Expr::BinaryOp { op: BinaryOperator::Mul, .. } => {}
-                        _ => panic!("Expected * to have higher precedence than +"),
-                    }
-                }
+                Expr::BinaryOp {
+                    op: BinaryOperator::Add,
+                    right,
+                    ..
+                } => match *right {
+                    Expr::BinaryOp {
+                        op: BinaryOperator::Mul,
+                        ..
+                    } => {}
+                    _ => panic!("Expected * to have higher precedence than +"),
+                },
                 _ => panic!("Expected addition at body level"),
             }
         }
@@ -305,8 +316,7 @@ fn test_parse_operator_precedence_with_let() {
 #[test]
 fn test_parse_pipe_with_multiple_args() {
     // This tests whether pipe handles function calls with additional args
-    let expr = Parser::parse("x |> substring(0, 5)")
-        .expect("Failed to parse");
+    let expr = Parser::parse("x |> substring(0, 5)").expect("Failed to parse");
     match expr {
         Expr::Pipe { .. } => {}
         _ => panic!("Expected pipe"),
@@ -315,15 +325,15 @@ fn test_parse_pipe_with_multiple_args() {
 
 #[test]
 fn test_parse_guard_with_complex_condition() {
-    let expr = Parser::parse("guard x > 0 && y < 100 in x + y")
-        .expect("Failed to parse");
+    let expr = Parser::parse("guard x > 0 && y < 100 in x + y").expect("Failed to parse");
     match expr {
-        Expr::Guard { condition, .. } => {
-            match *condition {
-                Expr::BinaryOp { op: BinaryOperator::And, .. } => {}
-                _ => panic!("Expected AND condition"),
-            }
-        }
+        Expr::Guard { condition, .. } => match *condition {
+            Expr::BinaryOp {
+                op: BinaryOperator::And,
+                ..
+            } => {}
+            _ => panic!("Expected AND condition"),
+        },
         _ => panic!("Expected guard"),
     }
 }
@@ -374,25 +384,25 @@ fn test_parse_single_field_object() {
 
 #[test]
 fn test_let_expression_with_string() {
-    let expr = Parser::parse("let greeting = 'hello' in greeting")
-        .expect("Failed to parse");
+    let expr = Parser::parse("let greeting = 'hello' in greeting").expect("Failed to parse");
     match expr {
-        Expr::Let { value, .. } => {
-            match *value {
-                Expr::String(ref s) => assert_eq!(s, "hello"),
-                _ => panic!("Expected string"),
-            }
-        }
+        Expr::Let { value, .. } => match *value {
+            Expr::String(ref s) => assert_eq!(s, "hello"),
+            _ => panic!("Expected string"),
+        },
         _ => panic!("Expected let"),
     }
 }
 
 #[test]
 fn test_if_with_string_values() {
-    let expr = Parser::parse("if verified then 'yes' else 'no'")
-        .expect("Failed to parse");
+    let expr = Parser::parse("if verified then 'yes' else 'no'").expect("Failed to parse");
     match expr {
-        Expr::If { then_branch, else_branch, .. } => {
+        Expr::If {
+            then_branch,
+            else_branch,
+            ..
+        } => {
             match *then_branch {
                 Expr::String(ref s) => assert_eq!(s, "yes"),
                 _ => panic!("Expected string"),
@@ -408,11 +418,10 @@ fn test_if_with_string_values() {
 
 #[test]
 fn test_parse_pipe_with_multiple_function_calls() {
-    let expr = Parser::parse("x |> trim() |> uppercase()")
-        .expect("Failed to parse");
+    let expr = Parser::parse("x |> trim() |> uppercase()").expect("Failed to parse");
     match expr {
         Expr::Pipe { functions, .. } => {
-            assert!(functions.len() > 0);
+            assert!(!functions.is_empty());
         }
         _ => panic!("Expected pipe"),
     }

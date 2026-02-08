@@ -180,7 +180,11 @@ pub fn verify_path_still_valid(path: &PathBuf, validation_cwd: &PathBuf) -> io::
 ///
 /// # Returns
 /// A tuple of (open_count, close_count) excluding characters in string literals
-fn count_balanced_with_string_awareness(expr: &str, open_char: char, close_char: char) -> (usize, usize) {
+fn count_balanced_with_string_awareness(
+    expr: &str,
+    open_char: char,
+    close_char: char,
+) -> (usize, usize) {
     let mut in_string = false;
     let mut string_delimiter = ' ';
     let mut escape_next = false;
@@ -285,7 +289,8 @@ pub fn validate_expression(expr: &str) -> Result<(), String> {
             || c.is_whitespace()
             || matches!(
                 c,
-                '.' | '_' | '@'
+                '.' | '_'
+                    | '@'
                     | '('
                     | ')'
                     | '['
@@ -399,7 +404,8 @@ pub fn validate_regex_pattern(pattern: &str) -> Result<(), String> {
                 // More detailed check: look for patterns like (X|Y)* where X and Y might overlap
                 if pattern.contains(")*") || pattern.contains(")+") || pattern.contains(")?") {
                     return Err(
-                        "Regex pattern contains quantified alternation (high ReDoS risk)".to_string(),
+                        "Regex pattern contains quantified alternation (high ReDoS risk)"
+                            .to_string(),
                     );
                 }
             }
@@ -991,8 +997,7 @@ mod tests {
     #[test]
     fn test_count_balanced_with_actual_parens() {
         // SECURITY FIX #1: Count actual parentheses outside strings
-        let (open, close) =
-            count_balanced_with_string_awareness(r#"(msg == "test")"#, '(', ')');
+        let (open, close) = count_balanced_with_string_awareness(r#"(msg == "test")"#, '(', ')');
         assert_eq!(open, 1);
         assert_eq!(close, 1);
     }
@@ -1000,11 +1005,8 @@ mod tests {
     #[test]
     fn test_count_balanced_escaped_quotes() {
         // SECURITY FIX #1: Escaped quotes shouldn't end the string
-        let (open, close) = count_balanced_with_string_awareness(
-            r#"(name == "test \" quote")"#,
-            '(',
-            ')',
-        );
+        let (open, close) =
+            count_balanced_with_string_awareness(r#"(name == "test \" quote")"#, '(', ')');
         assert_eq!(open, 1);
         assert_eq!(close, 1);
     }

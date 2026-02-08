@@ -192,8 +192,8 @@ impl RustCodeGenerator {
         input_type: &str,
     ) -> Result<TokenStream, String> {
         // Parse the ELO expression
-        let ast = crate::parser::Parser::parse(elo_expr)
-            .map_err(|e| format!("Parse error: {}", e))?;
+        let ast =
+            crate::parser::Parser::parse(elo_expr).map_err(|e| format!("Parse error: {}", e))?;
 
         // Generate code via visitor
         let mut visitor = ast_to_code::CodegenVisitor::new();

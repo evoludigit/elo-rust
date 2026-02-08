@@ -278,8 +278,8 @@ mod tests {
 
     #[test]
     fn test_literal_float() {
-        let expr = Expr::Literal(Literal::Float(3.14));
-        assert_eq!(expr, Expr::Literal(Literal::Float(3.14)));
+        let expr = Expr::Literal(Literal::Float(3.15));
+        assert_eq!(expr, Expr::Literal(Literal::Float(3.15)));
     }
 
     #[test]

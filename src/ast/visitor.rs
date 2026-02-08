@@ -106,61 +106,29 @@ pub trait DefaultVisitor<T>: Visitor<T> {
             Expr::Null => self.visit_null(),
             Expr::Identifier(name) => self.visit_identifier(name),
             Expr::String(value) => self.visit_string(value),
-            Expr::FieldAccess { receiver, field } => {
-                self.visit_field_access(receiver, field)
-            }
-            Expr::BinaryOp { op, left, right } => {
-                self.visit_binary_op(*op, left, right)
-            }
-            Expr::UnaryOp { op, operand } => {
-                self.visit_unary_op(*op, operand)
-            }
-            Expr::FunctionCall { name, args } => {
-                self.visit_function_call(name, args)
-            }
-            Expr::Lambda { param, body } => {
-                self.visit_lambda(param, body)
-            }
-            Expr::Let { name, value, body } => {
-                self.visit_let(name, value, body)
-            }
+            Expr::FieldAccess { receiver, field } => self.visit_field_access(receiver, field),
+            Expr::BinaryOp { op, left, right } => self.visit_binary_op(*op, left, right),
+            Expr::UnaryOp { op, operand } => self.visit_unary_op(*op, operand),
+            Expr::FunctionCall { name, args } => self.visit_function_call(name, args),
+            Expr::Lambda { param, body } => self.visit_lambda(param, body),
+            Expr::Let { name, value, body } => self.visit_let(name, value, body),
             Expr::If {
                 condition,
                 then_branch,
                 else_branch,
-            } => {
-                self.visit_if(condition, then_branch, else_branch)
-            }
-            Expr::Array(elements) => {
-                self.visit_array(elements)
-            }
-            Expr::Object(fields) => {
-                self.visit_object(fields)
-            }
-            Expr::Pipe { value, functions } => {
-                self.visit_pipe(value, functions)
-            }
+            } => self.visit_if(condition, then_branch, else_branch),
+            Expr::Array(elements) => self.visit_array(elements),
+            Expr::Object(fields) => self.visit_object(fields),
+            Expr::Pipe { value, functions } => self.visit_pipe(value, functions),
             Expr::Alternative {
                 primary,
                 alternative,
-            } => {
-                self.visit_alternative(primary, alternative)
-            }
-            Expr::Guard { condition, body } => {
-                self.visit_guard(condition, body)
-            }
-            Expr::Date(date) => {
-                self.visit_date(date)
-            }
-            Expr::DateTime(datetime) => {
-                self.visit_datetime(datetime)
-            }
-            Expr::Duration(duration) => {
-                self.visit_duration(duration)
-            }
-            Expr::TemporalKeyword(keyword) => {
-                self.visit_temporal_keyword(*keyword)
-            }
+            } => self.visit_alternative(primary, alternative),
+            Expr::Guard { condition, body } => self.visit_guard(condition, body),
+            Expr::Date(date) => self.visit_date(date),
+            Expr::DateTime(datetime) => self.visit_datetime(datetime),
+            Expr::Duration(duration) => self.visit_duration(duration),
+            Expr::TemporalKeyword(keyword) => self.visit_temporal_keyword(*keyword),
         }
     }
 }

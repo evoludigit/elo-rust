@@ -129,11 +129,7 @@ impl Optimizer {
     }
 
     /// Fold a binary operation on two literals
-    fn fold_binary_op(
-        op: BinaryOperator,
-        left: &Literal,
-        right: &Literal,
-    ) -> Option<Expr> {
+    fn fold_binary_op(op: BinaryOperator, left: &Literal, right: &Literal) -> Option<Expr> {
         match (left, right) {
             (Literal::Integer(l), Literal::Integer(r)) => {
                 match op {
@@ -153,9 +149,7 @@ impl Optimizer {
                         let result = l.checked_div(*r)?;
                         Some(Expr::Literal(Literal::Integer(result)))
                     }
-                    BinaryOperator::Mod if *r != 0 => {
-                        Some(Expr::Literal(Literal::Integer(l % r)))
-                    }
+                    BinaryOperator::Mod if *r != 0 => Some(Expr::Literal(Literal::Integer(l % r))),
                     BinaryOperator::Pow => {
                         if *r < 0 || *r > 31 {
                             return None; // Can't fold negative or large exponents
@@ -163,24 +157,12 @@ impl Optimizer {
                         let result = l.checked_pow(*r as u32)?;
                         Some(Expr::Literal(Literal::Integer(result)))
                     }
-                    BinaryOperator::Eq => {
-                        Some(Expr::Literal(Literal::Boolean(l == r)))
-                    }
-                    BinaryOperator::Neq => {
-                        Some(Expr::Literal(Literal::Boolean(l != r)))
-                    }
-                    BinaryOperator::Lt => {
-                        Some(Expr::Literal(Literal::Boolean(l < r)))
-                    }
-                    BinaryOperator::Lte => {
-                        Some(Expr::Literal(Literal::Boolean(l <= r)))
-                    }
-                    BinaryOperator::Gt => {
-                        Some(Expr::Literal(Literal::Boolean(l > r)))
-                    }
-                    BinaryOperator::Gte => {
-                        Some(Expr::Literal(Literal::Boolean(l >= r)))
-                    }
+                    BinaryOperator::Eq => Some(Expr::Literal(Literal::Boolean(l == r))),
+                    BinaryOperator::Neq => Some(Expr::Literal(Literal::Boolean(l != r))),
+                    BinaryOperator::Lt => Some(Expr::Literal(Literal::Boolean(l < r))),
+                    BinaryOperator::Lte => Some(Expr::Literal(Literal::Boolean(l <= r))),
+                    BinaryOperator::Gt => Some(Expr::Literal(Literal::Boolean(l > r))),
+                    BinaryOperator::Gte => Some(Expr::Literal(Literal::Boolean(l >= r))),
                     #[allow(clippy::needless_return)]
                     _ => return None,
                 }
@@ -194,8 +176,16 @@ impl Optimizer {
                     BinaryOperator::Div if *r != 0.0 => l / r,
                     BinaryOperator::Mod if *r != 0.0 => l % r,
                     BinaryOperator::Pow => l.powf(*r),
-                    BinaryOperator::Eq => return Some(Expr::Literal(Literal::Boolean((l - r).abs() < f64::EPSILON))),
-                    BinaryOperator::Neq => return Some(Expr::Literal(Literal::Boolean((l - r).abs() >= f64::EPSILON))),
+                    BinaryOperator::Eq => {
+                        return Some(Expr::Literal(Literal::Boolean(
+                            (l - r).abs() < f64::EPSILON,
+                        )))
+                    }
+                    BinaryOperator::Neq => {
+                        return Some(Expr::Literal(Literal::Boolean(
+                            (l - r).abs() >= f64::EPSILON,
+                        )))
+                    }
                     BinaryOperator::Lt => return Some(Expr::Literal(Literal::Boolean(l < r))),
                     BinaryOperator::Lte => return Some(Expr::Literal(Literal::Boolean(l <= r))),
                     BinaryOperator::Gt => return Some(Expr::Literal(Literal::Boolean(l > r))),
@@ -206,9 +196,7 @@ impl Optimizer {
             }
 
             (Literal::Boolean(l), Literal::Boolean(r)) => match op {
-                BinaryOperator::And => {
-                    Some(Expr::Literal(Literal::Boolean(*l && *r)))
-                }
+                BinaryOperator::And => Some(Expr::Literal(Literal::Boolean(*l && *r))),
                 BinaryOperator::Or => Some(Expr::Literal(Literal::Boolean(*l || *r))),
                 BinaryOperator::Eq => Some(Expr::Literal(Literal::Boolean(l == r))),
                 BinaryOperator::Neq => Some(Expr::Literal(Literal::Boolean(l != r))),

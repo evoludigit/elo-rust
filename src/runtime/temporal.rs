@@ -127,18 +127,15 @@ impl TemporalValue {
 
         match self {
             TemporalValue::Date(date) => {
-                let naive_dt = date.and_hms_opt(0, 0, 0)
+                let naive_dt = date
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
                 let dt = Utc.from_utc_datetime(&naive_dt);
                 let result_dt = dt + dur;
                 Ok(TemporalValue::DateTime(result_dt))
             }
-            TemporalValue::DateTime(dt) => {
-                Ok(TemporalValue::DateTime(*dt + dur))
-            }
-            TemporalValue::Duration(d) => {
-                Ok(TemporalValue::Duration(*d + dur))
-            }
+            TemporalValue::DateTime(dt) => Ok(TemporalValue::DateTime(*dt + dur)),
+            TemporalValue::Duration(d) => Ok(TemporalValue::Duration(*d + dur)),
         }
     }
 
@@ -151,18 +148,15 @@ impl TemporalValue {
 
         match self {
             TemporalValue::Date(date) => {
-                let naive_dt = date.and_hms_opt(0, 0, 0)
+                let naive_dt = date
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
                 let dt = Utc.from_utc_datetime(&naive_dt);
                 let result_dt = dt - dur;
                 Ok(TemporalValue::DateTime(result_dt))
             }
-            TemporalValue::DateTime(dt) => {
-                Ok(TemporalValue::DateTime(*dt - dur))
-            }
-            TemporalValue::Duration(d) => {
-                Ok(TemporalValue::Duration(*d - dur))
-            }
+            TemporalValue::DateTime(dt) => Ok(TemporalValue::DateTime(*dt - dur)),
+            TemporalValue::Duration(d) => Ok(TemporalValue::Duration(*d - dur)),
         }
     }
 
@@ -170,9 +164,11 @@ impl TemporalValue {
     pub fn difference(&self, other: &TemporalValue) -> Result<TemporalValue, String> {
         match (self, other) {
             (TemporalValue::Date(d1), TemporalValue::Date(d2)) => {
-                let dt1 = d1.and_hms_opt(0, 0, 0)
+                let dt1 = d1
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
-                let dt2 = d2.and_hms_opt(0, 0, 0)
+                let dt2 = d2
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
                 let diff = dt1.signed_duration_since(dt2);
                 Ok(TemporalValue::Duration(diff))
@@ -192,15 +188,9 @@ impl TemporalValue {
     /// Compare two temporal values
     pub fn compare(&self, other: &TemporalValue) -> Result<std::cmp::Ordering, String> {
         match (self, other) {
-            (TemporalValue::Date(d1), TemporalValue::Date(d2)) => {
-                Ok(d1.cmp(d2))
-            }
-            (TemporalValue::DateTime(dt1), TemporalValue::DateTime(dt2)) => {
-                Ok(dt1.cmp(dt2))
-            }
-            (TemporalValue::Duration(d1), TemporalValue::Duration(d2)) => {
-                Ok(d1.cmp(d2))
-            }
+            (TemporalValue::Date(d1), TemporalValue::Date(d2)) => Ok(d1.cmp(d2)),
+            (TemporalValue::DateTime(dt1), TemporalValue::DateTime(dt2)) => Ok(dt1.cmp(dt2)),
+            (TemporalValue::Duration(d1), TemporalValue::Duration(d2)) => Ok(d1.cmp(d2)),
             _ => Err(format!(
                 "Cannot compare {} with {}",
                 self.type_name(),
@@ -239,13 +229,15 @@ impl TemporalValue {
     pub fn start_of_day(&self) -> Result<TemporalValue, String> {
         match self {
             TemporalValue::Date(date) => {
-                let dt = date.and_hms_opt(0, 0, 0)
+                let dt = date
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
                 Ok(TemporalValue::DateTime(Utc.from_utc_datetime(&dt)))
             }
             TemporalValue::DateTime(dt) => {
                 let date = dt.date_naive();
-                let start_dt = date.and_hms_opt(0, 0, 0)
+                let start_dt = date
+                    .and_hms_opt(0, 0, 0)
                     .ok_or("Invalid date time combination")?;
                 Ok(TemporalValue::DateTime(Utc.from_utc_datetime(&start_dt)))
             }
@@ -257,13 +249,15 @@ impl TemporalValue {
     pub fn end_of_day(&self) -> Result<TemporalValue, String> {
         match self {
             TemporalValue::Date(date) => {
-                let dt = date.and_hms_opt(23, 59, 59)
+                let dt = date
+                    .and_hms_opt(23, 59, 59)
                     .ok_or("Invalid date time combination")?;
                 Ok(TemporalValue::DateTime(Utc.from_utc_datetime(&dt)))
             }
             TemporalValue::DateTime(dt) => {
                 let date = dt.date_naive();
-                let end_dt = date.and_hms_opt(23, 59, 59)
+                let end_dt = date
+                    .and_hms_opt(23, 59, 59)
                     .ok_or("Invalid date time combination")?;
                 Ok(TemporalValue::DateTime(Utc.from_utc_datetime(&end_dt)))
             }
@@ -430,7 +424,13 @@ mod tests {
 
     #[test]
     fn test_type_name() {
-        assert_eq!(TemporalValue::parse_date("2024-01-15").unwrap().type_name(), "date");
-        assert_eq!(TemporalValue::parse_duration("P1D").unwrap().type_name(), "duration");
+        assert_eq!(
+            TemporalValue::parse_date("2024-01-15").unwrap().type_name(),
+            "date"
+        );
+        assert_eq!(
+            TemporalValue::parse_duration("P1D").unwrap().type_name(),
+            "duration"
+        );
     }
 }

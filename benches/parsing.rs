@@ -2,12 +2,11 @@
 ///
 /// These benchmarks measure the performance of the ELO parser
 /// across various expression types and complexity levels.
-
 #[cfg(test)]
 mod benchmarks {
-    use elo_rust::parser::Parser;
-    use elo_rust::codegen::ast_to_code::CodegenVisitor;
     use elo_rust::ast::Visitor;
+    use elo_rust::codegen::ast_to_code::CodegenVisitor;
+    use elo_rust::parser::Parser;
 
     #[test]
     fn bench_parse_simple_expression() {

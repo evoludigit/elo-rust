@@ -83,7 +83,10 @@ impl ParseError {
         let error_line = lines[line - 1];
         let pointer = " ".repeat(column.saturating_sub(1)) + "^";
 
-        Some(format!("  {} |\n  {} | {}\n  {} | {}", line, "|", error_line, "|", pointer))
+        Some(format!(
+            "  {} |\n  {} | {}\n  {} | {}",
+            line, "|", error_line, "|", pointer
+        ))
     }
 }
 
@@ -141,12 +144,8 @@ mod tests {
 
     #[test]
     fn test_parse_error_with_explicit_context() {
-        let err = ParseError::with_explicit_context(
-            "invalid syntax",
-            1,
-            3,
-            "  | age >= 18\n  | ^^",
-        );
+        let err =
+            ParseError::with_explicit_context("invalid syntax", 1, 3, "  | age >= 18\n  | ^^");
         assert_eq!(err.message, "invalid syntax");
         assert!(err.context.is_some());
     }

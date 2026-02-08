@@ -4,8 +4,8 @@
 
 #[cfg(test)]
 mod error_tests {
-    use elo_rust::parser::Parser;
     use elo_rust::parser::error::ParseError;
+    use elo_rust::parser::Parser;
 
     #[test]
     fn test_parse_error_with_location() {
@@ -143,12 +143,7 @@ mod error_tests {
 
     #[test]
     fn test_parse_error_explicit_context() {
-        let err = ParseError::with_explicit_context(
-            "test error",
-            1,
-            5,
-            "test context"
-        );
+        let err = ParseError::with_explicit_context("test error", 1, 5, "test context");
         assert!(err.context.is_some());
         assert_eq!(err.message, "test error");
     }

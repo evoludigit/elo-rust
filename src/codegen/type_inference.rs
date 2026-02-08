@@ -118,10 +118,7 @@ impl InferredType {
             }
 
             // Otherwise, type mismatch
-            (a, b) => InferredType::Error(format!(
-                "Type mismatch: cannot unify {} and {}",
-                a, b
-            )),
+            (a, b) => InferredType::Error(format!("Type mismatch: cannot unify {} and {}", a, b)),
         }
     }
 }
@@ -156,14 +153,16 @@ impl TypeInferenceVisitor {
             Expr::Identifier(_) => InferredType::Unknown,
             Expr::String(_) => InferredType::String,
             Expr::FieldAccess { .. } => InferredType::Unknown,
-            Expr::BinaryOp { op, left, right } => {
-                Self::infer_binary_op(*op, left, right)
-            }
+            Expr::BinaryOp { op, left, right } => Self::infer_binary_op(*op, left, right),
             Expr::UnaryOp { op, operand } => Self::infer_unary_op(*op, operand),
             Expr::FunctionCall { name, args } => Self::infer_function_call(name, args),
             Expr::Lambda { .. } => InferredType::Unknown,
             Expr::Let { body, .. } => Self::infer_expr(body),
-            Expr::If { then_branch, else_branch, .. } => {
+            Expr::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 let then_type = Self::infer_expr(then_branch);
                 let else_type = Self::infer_expr(else_branch);
                 InferredType::common_type(&then_type, &else_type)
@@ -192,7 +191,10 @@ impl TypeInferenceVisitor {
                     Self::infer_expr(functions.last().unwrap())
                 }
             }
-            Expr::Alternative { primary, alternative } => {
+            Expr::Alternative {
+                primary,
+                alternative,
+            } => {
                 let primary_type = Self::infer_expr(primary);
                 let alt_type = Self::infer_expr(alternative);
                 InferredType::common_type(&primary_type, &alt_type)
@@ -230,10 +232,7 @@ impl TypeInferenceVisitor {
                 (InferredType::Duration, InferredType::Duration) => InferredType::Duration,
                 // Handle Unknown by returning the other type
                 (InferredType::Unknown, t) | (t, InferredType::Unknown) => t.clone(),
-                _ => InferredType::Error(format!(
-                    "Cannot add {} and {}",
-                    left_type, right_type
-                )),
+                _ => InferredType::Error(format!("Cannot add {} and {}", left_type, right_type)),
             },
             BinaryOperator::Sub => match (&left_type, &right_type) {
                 (InferredType::Integer, InferredType::Integer) => InferredType::Integer,
@@ -288,7 +287,8 @@ impl TypeInferenceVisitor {
             BinaryOperator::Mod | BinaryOperator::Pow => {
                 if left_type.is_numeric() && right_type.is_numeric() {
                     InferredType::Integer
-                } else if left_type == InferredType::Unknown || right_type == InferredType::Unknown {
+                } else if left_type == InferredType::Unknown || right_type == InferredType::Unknown
+                {
                     // If either is Unknown but the other is numeric, assume Integer result
                     InferredType::Integer
                 } else {
@@ -298,10 +298,12 @@ impl TypeInferenceVisitor {
                     ))
                 }
             }
-            BinaryOperator::Eq | BinaryOperator::Neq | BinaryOperator::Lt
-            | BinaryOperator::Lte | BinaryOperator::Gt | BinaryOperator::Gte => {
-                InferredType::Boolean
-            }
+            BinaryOperator::Eq
+            | BinaryOperator::Neq
+            | BinaryOperator::Lt
+            | BinaryOperator::Lte
+            | BinaryOperator::Gt
+            | BinaryOperator::Gte => InferredType::Boolean,
             BinaryOperator::And | BinaryOperator::Or => InferredType::Boolean,
         }
     }
@@ -318,9 +320,7 @@ impl TypeInferenceVisitor {
         match name {
             "length" | "uppercase" | "lowercase" | "trim" | "contains" | "starts_with"
             | "ends_with" => InferredType::String,
-            "map" | "filter" | "sort" => {
-                InferredType::Array(Box::new(InferredType::Unknown))
-            }
+            "map" | "filter" | "sort" => InferredType::Array(Box::new(InferredType::Unknown)),
             "abs" | "min" | "max" | "round" | "floor" | "ceil" => {
                 if args.is_empty() {
                     InferredType::Unknown
@@ -329,10 +329,7 @@ impl TypeInferenceVisitor {
                     if arg_type.is_numeric() {
                         arg_type
                     } else {
-                        InferredType::Error(format!(
-                            "Expected numeric argument, got {}",
-                            arg_type
-                        ))
+                        InferredType::Error(format!("Expected numeric argument, got {}", arg_type))
                     }
                 }
             }
@@ -373,12 +370,7 @@ impl Visitor<InferredType> for TypeInferenceVisitor {
         InferredType::Unknown
     }
 
-    fn visit_binary_op(
-        &mut self,
-        op: BinaryOperator,
-        left: &Expr,
-        right: &Expr,
-    ) -> InferredType {
+    fn visit_binary_op(&mut self, op: BinaryOperator, left: &Expr, right: &Expr) -> InferredType {
         Self::infer_binary_op(op, left, right)
     }
 
@@ -548,10 +540,7 @@ mod tests {
     fn test_infer_array_integers() {
         let expr = Parser::parse("[1, 2, 3]").unwrap();
         let ty = TypeInferenceVisitor::infer_expr(&expr);
-        assert_eq!(
-            ty,
-            InferredType::Array(Box::new(InferredType::Integer))
-        );
+        assert_eq!(ty, InferredType::Array(Box::new(InferredType::Integer)));
     }
 
     #[test]

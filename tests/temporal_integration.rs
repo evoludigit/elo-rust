@@ -2,9 +2,9 @@
 
 #[cfg(test)]
 mod temporal_tests {
-    use elo_rust::parser::Parser;
-    use elo_rust::codegen::ast_to_code::CodegenVisitor;
     use elo_rust::ast::Visitor;
+    use elo_rust::codegen::ast_to_code::CodegenVisitor;
+    use elo_rust::parser::Parser;
 
     #[test]
     fn test_parse_today_keyword() {
