@@ -1,7 +1,7 @@
 //! Tests for codegen module coverage
 
-use elo_rust::codegen::RustCodeGenerator;
 use elo_rust::codegen::types::{RustType, TypeContext, TypeInfo};
+use elo_rust::codegen::RustCodeGenerator;
 
 // ============================================================================
 // RUST CODE GENERATOR - MAIN MODULE
@@ -150,7 +150,9 @@ fn test_generate_field_access_another_receiver() {
 #[test]
 fn test_generate_function_signature_basic() {
     let gen = RustCodeGenerator::new();
-    let sig = gen.generate_function_signature("validate_user", "User").unwrap();
+    let sig = gen
+        .generate_function_signature("validate_user", "User")
+        .unwrap();
     let s = sig.to_string();
     assert!(s.contains("validate_user") || s.contains("User"));
 }
@@ -159,8 +161,12 @@ fn test_generate_function_signature_basic() {
 fn test_generate_function_signature_different_names() {
     let gen = RustCodeGenerator::new();
 
-    let sig1 = gen.generate_function_signature("check_age", "Person").unwrap();
-    let sig2 = gen.generate_function_signature("verify_email", "Contact").unwrap();
+    let sig1 = gen
+        .generate_function_signature("check_age", "Person")
+        .unwrap();
+    let sig2 = gen
+        .generate_function_signature("verify_email", "Contact")
+        .unwrap();
 
     let s1 = sig1.to_string();
     let s2 = sig2.to_string();
@@ -172,9 +178,9 @@ fn test_generate_function_signature_different_names() {
 #[test]
 fn test_generate_validator_simple() {
     let gen = RustCodeGenerator::new();
-    let validator =
-        gen.generate_validator("validate", "age >= 18", "User")
-            .unwrap();
+    let validator = gen
+        .generate_validator("validate", "age >= 18", "User")
+        .unwrap();
     let s = validator.to_string();
     assert!(!s.is_empty());
 }
