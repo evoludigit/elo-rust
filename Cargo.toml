@@ -17,6 +17,16 @@ path = "src/lib.rs"
 name = "simple_validator"
 path = "examples/simple_validator.rs"
 
+[[example]]
+name = "actix_validator"
+path = "examples/actix_validator.rs"
+required-features = ["serde-support"]
+
+[[example]]
+name = "axum_validator"
+path = "examples/axum_validator.rs"
+required-features = ["serde-support"]
+
 [dependencies]
 # AST and parsing support
 proc-macro2 = "1.0"

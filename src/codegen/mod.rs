@@ -174,7 +174,7 @@ impl RustCodeGenerator {
     /// # Arguments
     ///
     /// * `name` - The name of the validator function
-    /// * `elo_expr` - The ELO validation expression
+    /// * `_elo_expr` - The ELO validation expression
     /// * `input_type` - The type being validated
     ///
     /// # Returns
@@ -183,7 +183,7 @@ impl RustCodeGenerator {
     pub fn generate_validator(
         &self,
         name: &str,
-        elo_expr: &str,
+        _elo_expr: &str,
         input_type: &str,
     ) -> Result<TokenStream, String> {
         let fn_name = quote::format_ident!("{}", name);
@@ -194,7 +194,6 @@ impl RustCodeGenerator {
         // and generate appropriate validation code
         Ok(quote! {
             pub fn #fn_name(input: &#input_ident) -> Result<(), Vec<String>> {
-                // Validation logic generated from: #elo_expr
                 Ok(())
             }
         })
