@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1](https://github.com/evoludigit/elo-rust/compare/v0.4.0...v0.4.1) (2026-02-08)
+
+### Bug Fixes
+
+* resolve clippy warnings and formatting issues ([7ded5a9](https://github.com/evoludigit/elo-rust/commit/7ded5a98667cbf5d21a3b72de1ad96cf3fbd1658))
+* skip path validation tests on Windows and bump to v0.4.1 ([45a84fe](https://github.com/evoludigit/elo-rust/commit/45a84fea66dd70b87031bbb8caccaa1f96087075))
+
 ## 1.0.0 (2026-02-08)
 
 ### Features
