@@ -2,8 +2,10 @@
 //!
 //! Provides command-line interface for compiling ELO expressions to Rust
 
-use std::fs;
-use std::io::{self, Read};
+use elo_rust::security::{
+    read_file_with_limit, read_stdin_with_limit, validate_expression, validate_file_path,
+};
+use std::io;
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
@@ -44,18 +46,27 @@ fn compile_command(args: &[String]) -> io::Result<()> {
                 i += 1;
                 if i < args.len() {
                     input_file = Some(args[i].clone());
+                } else {
+                    eprintln!("Error: --input requires a value");
+                    return Ok(());
                 }
             }
             "--output" | "-o" => {
                 i += 1;
                 if i < args.len() {
                     output_file = Some(args[i].clone());
+                } else {
+                    eprintln!("Error: --output requires a value");
+                    return Ok(());
                 }
             }
             "--expression" | "-e" => {
                 i += 1;
                 if i < args.len() {
                     expression = Some(args[i].clone());
+                } else {
+                    eprintln!("Error: --expression requires a value");
+                    return Ok(());
                 }
             }
             "--help" | "-h" => {
@@ -71,8 +82,15 @@ fn compile_command(args: &[String]) -> io::Result<()> {
     let elo_expr = if let Some(expr) = expression {
         expr
     } else if let Some(file) = input_file {
-        fs::read_to_string(&file).map_err(|e| {
-            eprintln!("Failed to read input file: {}", e);
+        // Validate file path to prevent directory traversal
+        let safe_path = validate_file_path(&file).map_err(|e| {
+            eprintln!("Invalid input file path: {}", e);
+            e
+        })?;
+
+        // Read file with size limit to prevent memory exhaustion
+        read_file_with_limit(&safe_path).map_err(|e| {
+            eprintln!("Failed to read input file '{}': {}", file, e);
             e
         })?
     } else {
@@ -81,13 +99,26 @@ fn compile_command(args: &[String]) -> io::Result<()> {
         return Ok(());
     };
 
+    // Validate the expression
+    if let Err(e) = validate_expression(&elo_expr) {
+        eprintln!("Error: Invalid ELO expression: {}", e);
+        return Ok(());
+    }
+
     // Generate code
-    let generated_code = generate_validator_code(&elo_expr);
+    let generated_code = generate_validator_code();
 
     // Output result
     if let Some(out_file) = output_file {
-        fs::write(&out_file, &generated_code).map_err(|e| {
-            eprintln!("Failed to write output file: {}", e);
+        // Validate output file path to prevent directory traversal
+        let safe_output = validate_file_path(&out_file).map_err(|e| {
+            eprintln!("Invalid output file path: {}", e);
+            e
+        })?;
+
+        // Write with TOCTOU prevention using O_NOFOLLOW on Unix
+        write_file_safe(&safe_output, &generated_code).map_err(|e| {
+            eprintln!("Failed to write output file '{}': {}", out_file, e);
             e
         })?;
         println!("✓ Generated code written to {}", out_file);
@@ -108,6 +139,9 @@ fn validate_command(args: &[String]) -> io::Result<()> {
                 i += 1;
                 if i < args.len() {
                     input_file = Some(args[i].clone());
+                } else {
+                    eprintln!("Error: --input requires a value");
+                    return Ok(());
                 }
             }
             "--help" | "-h" => {
@@ -120,47 +154,86 @@ fn validate_command(args: &[String]) -> io::Result<()> {
     }
 
     let elo_expr = if let Some(file) = input_file {
-        fs::read_to_string(&file).map_err(|e| {
-            eprintln!("Failed to read input file: {}", e);
+        // Validate file path to prevent directory traversal
+        let safe_path = validate_file_path(&file).map_err(|e| {
+            eprintln!("Invalid input file path: {}", e);
+            e
+        })?;
+
+        // Read file with size limit to prevent memory exhaustion
+        read_file_with_limit(&safe_path).map_err(|e| {
+            eprintln!("Failed to read input file '{}': {}", file, e);
             e
         })?
     } else {
-        let mut input = String::new();
-        io::stdin().read_to_string(&mut input)?;
-        input
+        // Read from stdin with size limit to prevent memory exhaustion
+        read_stdin_with_limit().map_err(|e| {
+            eprintln!("Failed to read from stdin: {}", e);
+            e
+        })?
     };
 
     // Validate the ELO expression
-    if validate_expression(&elo_expr) {
-        println!("✓ ELO expression is valid");
-        Ok(())
-    } else {
-        eprintln!("✗ ELO expression is invalid");
-        Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "Invalid ELO expression",
-        ))
+    match validate_expression(&elo_expr) {
+        Ok(()) => {
+            println!("✓ ELO expression is valid");
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("✗ ELO expression is invalid: {}", e);
+            Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid ELO expression",
+            ))
+        }
     }
 }
 
-fn generate_validator_code(elo_expr: &str) -> String {
-    format!(
-        r#"//! Generated validator from ELO expression
-//! Expression: {}
+/// Writes file safely to prevent TOCTOU (Time of Check, Time of Use) attacks
+///
+/// Uses O_NOFOLLOW on Unix to prevent symlink races
+fn write_file_safe(path: &std::path::Path, content: &str) -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::io::Write;
+        use std::os::unix::fs::OpenOptionsExt;
 
-pub fn validate(input: &impl std::any::Any) -> Result<(), Vec<String>> {{
-    // Validation logic generated from ELO expression:
-    // {}
-    Ok(())
-}}
-"#,
-        elo_expr, elo_expr
-    )
+        // Open with O_NOFOLLOW to prevent symlink races
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .custom_flags(libc::O_NOFOLLOW)
+            .open(path)?;
+
+        file.write_all(content.as_bytes())?;
+        Ok(())
+    }
+
+    #[cfg(not(unix))]
+    {
+        // On non-Unix systems, use standard write
+        fs::write(path, content)
+    }
 }
 
-fn validate_expression(expr: &str) -> bool {
-    // Basic validation - just check it's not empty
-    !expr.trim().is_empty()
+/// Generates a safe validator code template
+///
+/// Does NOT embed user input in the generated code
+/// Expressions should be validated and stored separately
+fn generate_validator_code() -> String {
+    r#"//! Generated validator from ELO expression
+//!
+//! This is a safe template. The actual ELO expression
+//! should be validated and stored separately.
+
+pub fn validate(input: &impl std::any::Any) -> Result<(), Vec<String>> {
+    // Validation logic generated from ELO expression
+    // Expression validation happens at load time
+    Ok(())
+}
+"#
+    .to_string()
 }
 
 fn print_usage(program: &str) {

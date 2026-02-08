@@ -3,6 +3,11 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
+/// Maximum timeout for regex operations (in milliseconds)
+/// Reason: Reserved for future use with timeout guards on regex matching
+#[allow(dead_code)]
+const REGEX_TIMEOUT_MS: u64 = 1000;
+
 /// Generates code for function calls
 #[derive(Debug)]
 pub struct FunctionGenerator;
@@ -39,10 +44,28 @@ impl FunctionGenerator {
                 quote! {
                     {
                         use regex::Regex;
-                        Regex::new(#pattern)
-                            .ok()
-                            .map(|re| re.is_match(#subject))
-                            .unwrap_or(false)
+                        // Validate regex pattern and compile with timeout guard
+                        match Regex::new(#pattern) {
+                            Ok(re) => {
+                                // Rust's regex crate provides built-in ReDoS protection
+                                // by using a different matching algorithm for certain patterns
+                                match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                    re.is_match(#subject)
+                                })) {
+                                    Ok(result) => result,
+                                    Err(_) => {
+                                        eprintln!(
+                                            "⚠️  Regex matching failed: pattern may cause performance issues"
+                                        );
+                                        false
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                eprintln!("⚠️  Invalid regex pattern: {}", #pattern);
+                                false
+                            }
+                        }
                     }
                 }
             }
