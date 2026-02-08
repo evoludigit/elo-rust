@@ -43,71 +43,96 @@ A production-grade Rust code generation target for the ELO validation language. 
 
 ## Quick Start
 
-### As a Library
+### Using the Validator Macro
 
 ```rust
-use elo_rust::RustCodeGenerator;
+use elo_rust::elo_validator;
 
-let gen = RustCodeGenerator::new();
-let code = gen.generate_function_signature("validate_user", "User")?;
+#[elo_validator(elo = r#"
+  email matches "^[a-z]+@example\.com$" &&
+  age >= 18 &&
+  verified == true
+"#)]
+pub struct UserValidator;
+
+let user = User { age: 25, email: "john@example.com".to_string(), verified: true };
+match UserValidator::validate(&user) {
+    Ok(()) => println!("✅ Valid user"),
+    Err(e) => println!("❌ Error: {}", e),
+}
 ```
 
 ### Using the CLI
 
 ```bash
-# Generate validator from command line
-elo compile --expression "age >= 18"
+# Parse and validate ELO expression
+elo compile --expression "age >= 18 && verified == true"
 
-# Read from file, write to file
-elo compile --input rules.elo --output validator.rs
-
-# Validate ELO expression syntax
+# Parse from file
 elo validate --input rules.elo
+
+# Compile with output
+elo compile --input rules.elo --output validator.rs
 ```
 
-### In Actix-web
+### As a Library
+
+```rust
+use elo_rust::parser::Parser;
+use elo_rust::codegen::RustCodeGenerator;
+
+// Parse ELO expression
+let parser = Parser::new("age >= 18");
+let ast = parser.parse()?;
+
+// Generate Rust code
+let gen = RustCodeGenerator::new();
+let code = gen.generate_validator("validate_age", &ast, "User")?;
+```
+
+### In Actix-web (With ELO Validator)
 
 ```rust
 use actix_web::{post, web, App, HttpServer};
-use elo_rust::ValidationErrors;
+use elo_rust::elo_validator;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct CreateUserRequest {
     username: String,
     email: String,
     age: i32,
 }
 
-struct UserValidator;
-
-impl UserValidator {
-    pub fn validate(input: &CreateUserRequest) -> Result<(), ValidationErrors> {
-        let mut errors = ValidationErrors::new();
-
-        if input.age < 18 {
-            errors.add_error("age", "Must be at least 18");
-        }
-
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
-    }
+#[derive(Serialize)]
+struct ValidationError {
+    field: String,
+    message: String,
 }
+
+#[elo_validator(elo = r#"
+  email matches "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" &&
+  username.length() >= 3 && username.length() <= 20 &&
+  age >= 18 && age <= 120
+"#)]
+struct UserValidator;
 
 #[post("/users")]
 async fn create_user(req: web::Json<CreateUserRequest>) -> HttpResponse {
     match UserValidator::validate(&req) {
-        Ok(()) => HttpResponse::Created().json("User created"),
-        Err(errors) => HttpResponse::BadRequest().json(errors),
+        Ok(()) => HttpResponse::Created().json(serde_json::json!({
+            "message": "User created successfully"
+        })),
+        Err(errors) => HttpResponse::BadRequest().json(serde_json::json!({
+            "errors": errors
+        })),
     }
 }
 ```
 
-## Supported Functions
+## Supported Functions & Operators
 
-### String Functions (8 total)
+### String Functions (8)
 - `matches(pattern)` - Regex pattern matching
 - `contains(substring)` - Substring search
 - `length()` - String length
@@ -117,59 +142,96 @@ async fn create_user(req: web::Json<CreateUserRequest>) -> HttpResponse {
 - `starts_with(prefix)` - Prefix check
 - `ends_with(suffix)` - Suffix check
 
-### DateTime Functions (5 total)
+### DateTime Functions (5)
 - `today()` - Current date
 - `now()` - Current UTC timestamp
 - `age(birthdate)` - Age calculation from birthdate
 - `days_since(date)` - Days elapsed
 - `date("YYYY-MM-DD")` - Parse ISO 8601 date
 
-### Array Functions (5 total)
+### Temporal Keywords (16)
+`NOW`, `TODAY`, `TOMORROW`, `YESTERDAY`, `EPOCH`,
+`UTC`, `START_OF_DAY`, `END_OF_DAY`, `START_OF_WEEK`,
+`END_OF_WEEK`, `START_OF_MONTH`, `END_OF_MONTH`,
+`START_OF_YEAR`, `END_OF_YEAR`, `MIDNIGHT`, `NOON`
+
+### Array Functions (5)
 - `contains(value)` - Element search
 - `any(predicate)` - Existence check with closure
 - `all(predicate)` - Universal check with closure
 - `length()` - Array size
 - `is_empty()` - Empty check
 
-### Type Functions (2 total)
+### Type Functions (2)
 - `is_null()` - Option null check
 - `is_some()` - Option some check
 
-## Examples
+### Operators
+**Arithmetic**: `+`, `-`, `*`, `/`, `%`
+**Comparison**: `==`, `!=`, `<`, `<=`, `>`, `>=`
+**Logical**: `&&`, `||`, `!`
 
-### Age Validation
-```
+## Expression Examples
+
+### Simple Validation
+```elo
 age >= 18
 ```
 
-### Email Validation
-```
-matches(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
+### Email & Username Validation
+```elo
+email matches "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" &&
+username |> length() >= 3 && username |> length() <= 20
 ```
 
-### Complex User Validation
+### Temporal Validation (New in 0.4.0)
+```elo
+created_at >= TODAY &&
+expires_at > NOW &&
+updated_at < END_OF_DAY
 ```
-length(email) > 5 &&
-length(username) >= 3 && length(username) <= 20 &&
-age >= 18 &&
-age <= 120 &&
-verified == true &&
-!banned
+
+### Conditional Validation with Let Bindings
+```elo
+let username_len = username |> length() in
+let email_valid = email matches "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" in
+username_len >= 3 && username_len <= 20 && email_valid
+```
+
+### User Account Validation with Guard
+```elo
+guard age >= 18 && verified in
+email matches "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" &&
+username |> length() >= 3
 ```
 
 ### Permission Checking
-```
-(contains(roles, 'admin') || contains(roles, 'moderator')) &&
+```elo
+(roles |> contains("admin") || roles |> contains("moderator")) &&
 verified == true &&
-!banned
+active == true
 ```
 
-### Order Validation
+### Order Validation with Aggregation
+```elo
+items |> length() > 0 &&
+items |> all(quantity > 0 && price > 0) &&
+total > 0
 ```
-length(items) > 0 &&
-all(items, quantity > 0 && price > 0) &&
-total > 0 &&
-days_since(created_at) < 30
+
+### Conditional Pricing with If Expression
+```elo
+if verified then price * 0.9 else price
+```
+
+### Complex Policy Logic
+```elo
+let is_admin = roles |> contains("admin") in
+let account_age = days_since(created_at) in
+if is_admin then
+  account_age > 0
+else
+  account_age > 30 && verified && payment_verified
 ```
 
 ## API Documentation
