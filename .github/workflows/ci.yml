@@ -12,6 +12,8 @@ on:
       - '.github/workflows/ci.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/publish.yml'
+      - '.github/workflows/security.yml'
+      - 'cargo-deny.toml'
   pull_request:
     branches: [ main, develop ]
     paths:
@@ -20,6 +22,7 @@ on:
       - 'examples/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
+      - 'cargo-deny.toml'
 
 env:
   CARGO_TERM_COLOR: always
@@ -153,3 +156,27 @@ jobs:
 
       - name: Run security audit
         run: cargo audit
+
+  sbom:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Generate dependency tree (SBOM)
+        run: cargo tree --depth 10 > dependencies.txt
+
+      - name: List all dependencies
+        run: cargo tree --all-features > all-dependencies.txt
+
+      - name: Upload dependency artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: |
+            dependencies.txt
+            all-dependencies.txt
