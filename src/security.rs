@@ -172,17 +172,21 @@ pub fn validate_expression(expr: &str) -> Result<(), String> {
     }
 
     // Check for allowed characters
-    // Allow: alphanumeric, whitespace, operators, quotes, parentheses, brackets, dots, underscores
+    // Allow: alphanumeric, whitespace, operators, quotes, parentheses, brackets, braces, dots, underscores
+    // ELO operators: ~> (lambda), |> (pipe), ?| (alternative), ^ (power)
+    // Temporal: @ (for @date, @datetime, @duration)
     if !expr.chars().all(|c| {
         c.is_alphanumeric()
             || c.is_whitespace()
             || matches!(
                 c,
-                '.' | '_'
+                '.' | '_' | '@'
                     | '('
                     | ')'
                     | '['
                     | ']'
+                    | '{'
+                    | '}'
                     | '='
                     | '<'
                     | '>'
@@ -194,6 +198,9 @@ pub fn validate_expression(expr: &str) -> Result<(), String> {
                     | '*'
                     | '/'
                     | '%'
+                    | '^'
+                    | '~'
+                    | '?'
                     | '"'
                     | '\''
                     | ':'

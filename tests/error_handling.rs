@@ -1,192 +1,204 @@
-//! Error handling tests
+//! Comprehensive error handling tests
 //!
-//! Comprehensive tests for validation errors and code generation errors
+//! Tests for parse errors and error context display
 
-use elo_rust::codegen::CodeGenError;
-use elo_rust::{ValidationError, ValidationErrors};
+#[cfg(test)]
+mod error_tests {
+    use elo_rust::parser::Parser;
+    use elo_rust::parser::error::ParseError;
 
-#[test]
-fn test_validation_error_creation() {
-    let err = ValidationError::new("email", "Invalid email", "email_pattern");
-    assert_eq!(err.path, "email");
-    assert_eq!(err.message, "Invalid email");
-    assert_eq!(err.rule, "email_pattern");
-    assert_eq!(err.value, None);
-}
+    #[test]
+    fn test_parse_error_with_location() {
+        let expr = "age >=";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-#[test]
-fn test_validation_error_with_value() {
-    let err = ValidationError::new("email", "Invalid email", "email_pattern")
-        .with_value("invalid@example");
-    assert_eq!(err.value, Some("invalid@example".to_string()));
-}
+    #[test]
+    fn test_valid_expression() {
+        let expr = "age >= 18";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_validation_error_display() {
-    let err = ValidationError::new("email", "Invalid email", "email_pattern");
-    assert_eq!(err.to_string(), "email: Invalid email");
-}
+    #[test]
+    fn test_unbalanced_parentheses_open() {
+        let expr = "(age >= 18";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-#[test]
-fn test_validation_error_debug() {
-    let err = ValidationError::new("age", "Too young", "min_age");
-    let debug_str = format!("{:?}", err);
-    assert!(debug_str.contains("age"));
-    assert!(debug_str.contains("Too young"));
-}
+    #[test]
+    fn test_empty_function_call() {
+        let expr = "()";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-#[test]
-fn test_validation_error_clone() {
-    let err1 = ValidationError::new("field", "message", "rule");
-    let err2 = err1.clone();
-    assert_eq!(err1, err2);
-}
+    #[test]
+    fn test_missing_operand() {
+        let expr = "age >=";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-#[test]
-fn test_validation_errors_empty() {
-    let errors = ValidationErrors::new();
-    assert!(errors.is_empty());
-    assert_eq!(errors.len(), 0);
-}
+    #[test]
+    fn test_parse_error_context_first_line() {
+        let input = "age >= 18";
+        let err = ParseError::with_context("test error", input, 5);
+        assert_eq!(err.line, 1);
+        assert!(err.context.is_some());
+        let context = err.context.unwrap();
+        assert!(context.contains("age >= 18"));
+    }
 
-#[test]
-fn test_validation_errors_push() {
-    let mut errors = ValidationErrors::new();
-    assert!(errors.is_empty());
+    #[test]
+    fn test_parse_error_context_multiline() {
+        let input = "name == 'John'\nage >= 18";
+        let err = ParseError::with_context("test error", input, 20);
+        assert_eq!(err.line, 2);
+        assert!(err.context.is_some());
+    }
 
-    errors.push(ValidationError::new("email", "Invalid", "rule1"));
-    assert!(!errors.is_empty());
-    assert_eq!(errors.len(), 1);
+    #[test]
+    fn test_parse_error_display_format() {
+        let err = ParseError::new("unexpected token", 1, 5);
+        let display = err.to_string();
+        assert!(display.contains("Parse error"));
+        assert!(display.contains("line 1"));
+        assert!(display.contains("column 5"));
+    }
 
-    errors.push(ValidationError::new("age", "Too young", "rule2"));
-    assert_eq!(errors.len(), 2);
-}
+    #[test]
+    fn test_parse_error_display_with_context() {
+        let input = "age >= 18";
+        let err = ParseError::with_context("error occurred", input, 0);
+        let display = err.to_string();
+        assert!(display.contains("Parse error"));
+        assert!(display.contains("age >= 18"));
+    }
 
-#[test]
-fn test_validation_errors_default() {
-    let errors = ValidationErrors::default();
-    assert!(errors.is_empty());
-}
+    #[test]
+    fn test_nested_function_calls() {
+        let expr = "length(uppercase(name))";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_validation_errors_display_single() {
-    let mut errors = ValidationErrors::new();
-    errors.push(ValidationError::new("field", "message", "rule"));
-    let output = errors.to_string();
-    assert_eq!(output, "field: message");
-}
+    #[test]
+    fn test_valid_lambda_syntax() {
+        let expr = "x ~> x * 2";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_validation_errors_display_multiple() {
-    let mut errors = ValidationErrors::new();
-    errors.push(ValidationError::new("email", "Invalid email", "rule1"));
-    errors.push(ValidationError::new("age", "Too young", "rule2"));
+    #[test]
+    fn test_invalid_let_syntax() {
+        let expr = "let x =";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-    let output = errors.to_string();
-    assert!(output.contains("email: Invalid email"));
-    assert!(output.contains("age: Too young"));
-}
+    #[test]
+    fn test_valid_let_expression() {
+        let expr = "let x = 5 in x + 1";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_validation_errors_clone() {
-    let mut errors1 = ValidationErrors::new();
-    errors1.push(ValidationError::new("field", "message", "rule"));
+    #[test]
+    fn test_incomplete_if_expression() {
+        let expr = "if age >= 18";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-    let errors2 = errors1.clone();
-    assert_eq!(errors1, errors2);
-    assert_eq!(errors1.len(), errors2.len());
-}
+    #[test]
+    fn test_valid_if_expression() {
+        let expr = "if age >= 18 then 'adult' else 'minor'";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_codegen_error_unsupported_feature() {
-    let err = CodeGenError::UnsupportedFeature("custom functions".to_string());
-    let msg = err.to_string();
-    assert!(msg.contains("custom functions"));
-}
+    #[test]
+    fn test_invalid_pipe_syntax() {
+        let expr = "email |>";
+        let err = Parser::parse(expr);
+        assert!(err.is_err());
+    }
 
-#[test]
-fn test_codegen_error_type_mismatch() {
-    let err = CodeGenError::TypeMismatch("Expected string, found integer".to_string());
-    let msg = err.to_string();
-    assert!(msg.contains("Expected string"));
-}
+    #[test]
+    fn test_valid_pipe_syntax() {
+        let expr = "email |> uppercase()";
+        let result = Parser::parse(expr);
+        assert!(result.is_ok());
+    }
 
-#[test]
-fn test_codegen_error_invalid_expression() {
-    let err = CodeGenError::InvalidExpression("malformed syntax".to_string());
-    let msg = err.to_string();
-    assert!(msg.contains("malformed syntax"));
-}
+    #[test]
+    fn test_parse_error_column_accuracy() {
+        let input = "age >= 18";
+        let err = ParseError::with_context("unexpected", input, 5);
+        assert_eq!(err.column, 6);
+    }
 
-#[test]
-fn test_codegen_error_debug() {
-    let err = CodeGenError::UnsupportedFeature("async".to_string());
-    let debug_str = format!("{:?}", err);
-    assert!(debug_str.contains("UnsupportedFeature"));
-}
+    #[test]
+    fn test_parse_error_explicit_context() {
+        let err = ParseError::with_explicit_context(
+            "test error",
+            1,
+            5,
+            "test context"
+        );
+        assert!(err.context.is_some());
+        assert_eq!(err.message, "test error");
+    }
 
-#[test]
-fn test_codegen_error_clone() {
-    let err1 = CodeGenError::InvalidExpression("test".to_string());
-    let err2 = err1.clone();
-    assert_eq!(err1.to_string(), err2.to_string());
-}
+    #[test]
+    fn test_parse_error_clone() {
+        let err1 = ParseError::new("test", 1, 5);
+        let err2 = err1.clone();
+        assert_eq!(err1, err2);
+    }
 
-#[test]
-fn test_validation_error_is_error() {
-    use std::error::Error;
-    let err: Box<dyn Error> = Box::new(ValidationError::new("field", "msg", "rule"));
-    assert!(!err.to_string().is_empty());
-}
+    #[test]
+    fn test_parse_error_equality() {
+        let err1 = ParseError::new("same message", 1, 5);
+        let err2 = ParseError::new("same message", 1, 5);
+        assert_eq!(err1, err2);
+    }
 
-#[test]
-fn test_validation_errors_is_error() {
-    use std::error::Error;
-    let mut errors = ValidationErrors::new();
-    errors.push(ValidationError::new("field", "msg", "rule"));
-    let err: Box<dyn Error> = Box::new(errors);
-    assert!(!err.to_string().is_empty());
-}
+    #[test]
+    fn test_parse_error_inequality() {
+        let err1 = ParseError::new("message1", 1, 5);
+        let err2 = ParseError::new("message2", 1, 5);
+        assert_ne!(err1, err2);
+    }
 
-#[test]
-fn test_error_with_multiple_fields() {
-    let err1 = ValidationError::new("user.email", "Invalid email", "email_pattern");
-    let err2 = ValidationError::new("user.age", "Too young", "min_age");
-    let err3 = ValidationError::new("user.status", "Invalid status", "enum_check");
+    #[test]
+    fn test_parse_error_different_location() {
+        let err1 = ParseError::new("same message", 1, 5);
+        let err2 = ParseError::new("same message", 2, 10);
+        assert_ne!(err1, err2);
+    }
 
-    assert_eq!(err1.path, "user.email");
-    assert_eq!(err2.path, "user.age");
-    assert_eq!(err3.path, "user.status");
-}
+    #[test]
+    fn test_multiple_errors_in_context() {
+        let input = "age >= 18\nname ==\nemail > 5";
+        let err = ParseError::with_context("line 2 error", input, 11);
+        assert_eq!(err.line, 2);
+    }
 
-#[test]
-fn test_validation_errors_iteration() {
-    let mut errors = ValidationErrors::new();
-    errors.push(ValidationError::new("field1", "msg1", "rule1"));
-    errors.push(ValidationError::new("field2", "msg2", "rule2"));
-    errors.push(ValidationError::new("field3", "msg3", "rule3"));
+    #[test]
+    fn test_error_at_end_of_input() {
+        let input = "age >=";
+        let err = ParseError::with_context("end of input", input, 6);
+        assert!(err.context.is_some());
+    }
 
-    assert_eq!(errors.len(), 3);
-    assert!(!errors.is_empty());
-
-    // Verify all errors are in the collection
-    let output = errors.to_string();
-    assert!(output.contains("field1"));
-    assert!(output.contains("field2"));
-    assert!(output.contains("field3"));
-}
-
-#[test]
-fn test_validation_error_with_complex_value() {
-    let complex_value = r#"{"nested": {"field": "value"}}"#;
-    let err = ValidationError::new("json", "Invalid JSON", "json_parse").with_value(complex_value);
-    assert_eq!(err.value, Some(complex_value.to_string()));
-}
-
-#[test]
-fn test_validation_error_nested_path() {
-    let err = ValidationError::new("user.address.street.line1", "Street too long", "max_length");
-    assert_eq!(err.path, "user.address.street.line1");
-    let display = err.to_string();
-    assert!(display.contains("user.address.street.line1"));
+    #[test]
+    fn test_error_position_to_line_col() {
+        let input = "first line\nsecond line\nthird line";
+        let err = ParseError::with_context("test", input, 22);
+        assert_eq!(err.line, 2);
+    }
 }

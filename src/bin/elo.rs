@@ -106,7 +106,7 @@ fn compile_command(args: &[String]) -> io::Result<()> {
     }
 
     // Generate code
-    let generated_code = generate_validator_code();
+    let generated_code = generate_validator_code(&elo_expr);
 
     // Output result
     if let Some(out_file) = output_file {
@@ -221,19 +221,28 @@ fn write_file_safe(path: &std::path::Path, content: &str) -> io::Result<()> {
 ///
 /// Does NOT embed user input in the generated code
 /// Expressions should be validated and stored separately
-fn generate_validator_code() -> String {
-    r#"//! Generated validator from ELO expression
-//!
-//! This is a safe template. The actual ELO expression
-//! should be validated and stored separately.
+fn generate_validator_code(elo_expr: &str) -> String {
+    use elo_rust::RustCodeGenerator;
 
-pub fn validate(input: &impl std::any::Any) -> Result<(), Vec<String>> {
-    // Validation logic generated from ELO expression
-    // Expression validation happens at load time
-    Ok(())
-}
-"#
-    .to_string()
+    // Create a code generator
+    let generator = RustCodeGenerator::new();
+
+    // Generate the validator function
+    match generator.generate_validator("validate", elo_expr, "T") {
+        Ok(tokens) => {
+            format!(
+                "//! Generated validator from ELO expression\n\n{}\n",
+                tokens
+            )
+        }
+        Err(e) => {
+            eprintln!("Codegen error: {}", e);
+            format!(
+                "//! Codegen error: {}\npub fn validate(input: &impl std::any::Any) -> Result<(), Vec<String>> {{\n    Err(vec![\"{}\".to_string()])\n}}\n",
+                e, e
+            )
+        }
+    }
 }
 
 fn print_usage(program: &str) {
