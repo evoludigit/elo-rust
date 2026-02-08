@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/evoludigit/elo-rust/compare/v0.2.1...v0.3.0) (2026-02-08)
+
+### Features
+
+* add comprehensive security scanning and SBOM generation ([4682805](https://github.com/evoludigit/elo-rust/commit/46828054c43a1c90a6fe5a42cd7c516d84f4ab1e))
+
+### Bug Fixes
+
+* make file not found error message check platform-agnostic ([5ce15f2](https://github.com/evoludigit/elo-rust/commit/5ce15f25ad681be2451f690c11a5907c01f868d5))
+* mark Unix-specific path validation tests with cfg(unix) ([684da2a](https://github.com/evoludigit/elo-rust/commit/684da2a2aa2ef27199d2c36ad0aeb29e0bb9f3e9))
+* resolve CI failures (artifacts API and Windows binary path) ([d5c0ae4](https://github.com/evoludigit/elo-rust/commit/d5c0ae46aec914bd1225b9c924ab8fa0efb65fba))
+* resolve missing fs import on Windows builds ([31fc317](https://github.com/evoludigit/elo-rust/commit/31fc317a54ae48f6e1aea159b709cae424567382))
+* skip Windows-specific file path tests on Windows platform ([66c88ad](https://github.com/evoludigit/elo-rust/commit/66c88adcc47612fe2ea152c085c76b8b19d636f0))
+
 ## [0.2.1](https://github.com/evoludigit/elo-rust/compare/v0.2.0...v0.2.1) (2026-02-08)
 
 ### Bug Fixes
