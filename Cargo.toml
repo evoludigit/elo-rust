@@ -8,6 +8,18 @@ license = "MIT"
 repository = "https://github.com/evoludigit/elo-rust"
 keywords = ["validation", "elo", "code-generation", "rust"]
 categories = ["development-tools::procedural-macro-helpers"]
+exclude = [
+    "target/",
+    ".git/",
+    ".github/",
+    "docs/",
+    ".gitignore",
+    ".releaserc.json",
+    "release.toml",
+    "commitlint.config.js",
+    "CHANGELOG.md",
+    "RELEASE_GUIDE.md",
+]
 
 [lib]
 name = "elo_rust"
