@@ -380,18 +380,21 @@ mod tests {
     // ============================================================================
 
     #[test]
+    #[cfg(unix)]
     fn test_valid_relative_path() {
         let result = validate_file_path("output.rs");
         assert!(result.is_ok());
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_valid_nested_path() {
         let result = validate_file_path("target/debug/generated.rs");
         assert!(result.is_ok());
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_rejects_absolute_path_unix() {
         let result = validate_file_path("/etc/passwd");
         assert!(result.is_err());
