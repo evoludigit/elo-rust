@@ -125,7 +125,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "sed -i 's/^version = \".*\"/version = \"${nextRelease.version}\"/' Cargo.toml && cargo generate-lockfile"
+        "prepareCmd": "sed -i 's/^version = \".*\"/version = \"${nextRelease.version}\"/' Cargo.toml && cargo generate-lockfile && sed -i 's/\\*\\*Version\\*\\*: .*/\\*\\*Version\\*\\*: ${nextRelease.version}/' README.md"
       }
     ],
     [
@@ -134,7 +134,8 @@
         "assets": [
           "Cargo.toml",
           "Cargo.lock",
-          "CHANGELOG.md"
+          "CHANGELOG.md",
+          "README.md"
         ],
         "message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
       }
