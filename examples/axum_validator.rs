@@ -43,9 +43,7 @@ pub struct ValidationErrors {
 
 impl ValidationErrors {
     pub fn new() -> Self {
-        Self {
-            errors: Vec::new(),
-        }
+        Self { errors: Vec::new() }
     }
 
     pub fn add_error(&mut self, field: &str, message: &str) {

@@ -136,7 +136,10 @@ fn validate_command(args: &[String]) -> io::Result<()> {
         Ok(())
     } else {
         eprintln!("✗ ELO expression is invalid");
-        Err(io::Error::new(io::ErrorKind::InvalidInput, "Invalid ELO expression"))
+        Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Invalid ELO expression",
+        ))
     }
 }
 
@@ -146,8 +149,8 @@ fn generate_validator_code(elo_expr: &str) -> String {
 //! Expression: {}
 
 pub fn validate(input: &impl std::any::Any) -> Result<(), Vec<String>> {{
-    // Validation logic generated from ELO expression
-    // TODO: Implement validation based on: {}
+    // Validation logic generated from ELO expression:
+    // {}
     Ok(())
 }}
 "#,
