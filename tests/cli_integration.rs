@@ -109,6 +109,7 @@ fn test_compile_with_short_expression_flag() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_compile_to_file() {
     let output_file = "test_output.rs";
 
@@ -133,6 +134,7 @@ fn test_compile_to_file() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_compile_with_short_output_flag() {
     let output_file = "test_output2.rs";
 
@@ -146,6 +148,7 @@ fn test_compile_with_short_output_flag() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_compile_from_file() {
     let input_file = "test_input.elo";
 
@@ -161,6 +164,7 @@ fn test_compile_from_file() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_compile_short_input_flag() {
     let input_file = "test_input2.elo";
 
@@ -216,6 +220,7 @@ fn test_compile_unknown_argument() {
 // ============================================================================
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_validate_from_file() {
     let input_file = "test_validate.elo";
 
@@ -231,6 +236,7 @@ fn test_validate_from_file() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore = "File paths require Unix-like semantics")]
 fn test_validate_short_input_flag() {
     let input_file = "test_validate2.elo";
 
