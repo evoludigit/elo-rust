@@ -3,7 +3,7 @@
 **Audit Date**: February 8, 2026
 **Audit Period**: 5-phase comprehensive review
 **Repository**: /home/lionel/code/elo-rust-target
-**Target**: https://github.com/blambeau/elo (upstream contribution)
+**Target**: https://github.com/enspirit/elo (upstream contribution)
 
 ---
 
@@ -356,7 +356,7 @@ Contribution:      ✅ Upstream-ready
 
 ### Timeline for PR Submission
 
-**Recommended**: Immediate submission to https://github.com/blambeau/elo
+**Recommended**: Immediate submission to https://github.com/enspirit/elo
 
 - **PR Title**: "feat: add Rust code generation target"
 - **PR Description**: Reference this audit, link to features
@@ -435,7 +435,7 @@ The ELO Rust Code Generation Target represents a **high-quality, professional im
 
 The project is ready. The audit is complete. The verdict is clear.
 
-**RECOMMENDATION**: Proceed immediately with pull request submission to https://github.com/blambeau/elo
+**RECOMMENDATION**: Proceed immediately with pull request submission to https://github.com/enspirit/elo
 
 This code will serve the community well and reflect positively on the ELO project's ecosystem.
 
@@ -492,7 +492,7 @@ All audit findings have been documented in:
 | Confidence Level | Very High (99%+) |
 | Assessment Model | Objective, standards-based |
 | Repository | /home/lionel/code/elo-rust-target |
-| Target Upstream | https://github.com/blambeau/elo |
+| Target Upstream | https://github.com/enspirit/elo |
 
 ---
 
