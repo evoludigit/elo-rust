@@ -477,88 +477,77 @@ mod tests {
     #[test]
     fn test_infer_integer_literal() {
         let expr = Parser::parse("42").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Integer);
     }
 
     #[test]
     fn test_infer_float_literal() {
         let expr = Parser::parse("3.14").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Float);
     }
 
     #[test]
     fn test_infer_string_literal() {
         let expr = Parser::parse("'hello'").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::String);
     }
 
     #[test]
     fn test_infer_boolean_literal() {
         let expr = Parser::parse("true").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Boolean);
     }
 
     #[test]
     fn test_infer_null_literal() {
         let expr = Parser::parse("null").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Null);
     }
 
     #[test]
     fn test_infer_integer_addition() {
         let expr = Parser::parse("1 + 2").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Integer);
     }
 
     #[test]
     fn test_infer_float_arithmetic() {
         let expr = Parser::parse("3.0 + 2.0").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Float);
     }
 
     #[test]
     fn test_infer_mixed_numeric() {
         let expr = Parser::parse("1 + 2.0").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Float);
     }
 
     #[test]
     fn test_infer_comparison() {
         let expr = Parser::parse("5 > 3").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Boolean);
     }
 
     #[test]
     fn test_infer_logical_and() {
         let expr = Parser::parse("true && false").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Boolean);
     }
 
     #[test]
     fn test_infer_array_integers() {
         let expr = Parser::parse("[1, 2, 3]").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(
             ty,
             InferredType::Array(Box::new(InferredType::Integer))
@@ -568,56 +557,49 @@ mod tests {
     #[test]
     fn test_infer_array_mixed_numeric() {
         let expr = Parser::parse("[1, 2.0, 3]").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Array(Box::new(InferredType::Float)));
     }
 
     #[test]
     fn test_infer_empty_array() {
         let expr = Parser::parse("[]").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Array(Box::new(InferredType::Unknown)));
     }
 
     #[test]
     fn test_infer_if_same_types() {
         let expr = Parser::parse("if true then 1 else 2").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Integer);
     }
 
     #[test]
     fn test_infer_if_different_numeric_types() {
         let expr = Parser::parse("if true then 1 else 2.0").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Float);
     }
 
     #[test]
     fn test_infer_let_expression() {
         let expr = Parser::parse("let x = 5 in x + 3").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Integer);
     }
 
     #[test]
     fn test_infer_unary_not() {
         let expr = Parser::parse("!true").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::Boolean);
     }
 
     #[test]
     fn test_infer_string_concat() {
         let expr = Parser::parse("'hello' + ' world'").unwrap();
-        let mut visitor = TypeInferenceVisitor::new();
-        let ty = visitor.infer(&expr);
+        let ty = TypeInferenceVisitor::infer_expr(&expr);
         assert_eq!(ty, InferredType::String);
     }
 
