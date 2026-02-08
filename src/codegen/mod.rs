@@ -168,6 +168,67 @@ impl RustCodeGenerator {
         // For now, just return empty - doc comments will be added via token manipulation
         Ok(quote! {})
     }
+
+    /// Generate a complete validator function from an ELO expression
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the validator function
+    /// * `elo_expr` - The ELO validation expression
+    /// * `input_type` - The type being validated
+    ///
+    /// # Returns
+    ///
+    /// A `TokenStream` representing the complete validator function
+    pub fn generate_validator(
+        &self,
+        name: &str,
+        elo_expr: &str,
+        input_type: &str,
+    ) -> Result<TokenStream, String> {
+        let fn_name = quote::format_ident!("{}", name);
+        let input_ident = quote::format_ident!("{}", input_type);
+
+        // For now, generate a basic validator structure
+        // In a full implementation, this would parse the ELO expression
+        // and generate appropriate validation code
+        Ok(quote! {
+            pub fn #fn_name(input: &#input_ident) -> Result<(), Vec<String>> {
+                // Validation logic generated from: #elo_expr
+                Ok(())
+            }
+        })
+    }
+
+    /// Generate validator implementation for a type
+    ///
+    /// # Arguments
+    ///
+    /// * `struct_name` - The name of the struct implementing the validator
+    /// * `validator_fn_name` - The name of the validation function
+    /// * `input_type` - The type being validated
+    ///
+    /// # Returns
+    ///
+    /// A `TokenStream` representing the impl block
+    pub fn generate_validator_impl(
+        &self,
+        struct_name: &str,
+        validator_fn_name: &str,
+        input_type: &str,
+    ) -> Result<TokenStream, String> {
+        let struct_ident = quote::format_ident!("{}", struct_name);
+        let fn_ident = quote::format_ident!("{}", validator_fn_name);
+        let input_ident = quote::format_ident!("{}", input_type);
+
+        Ok(quote! {
+            impl #struct_ident {
+                pub fn #fn_ident(input: &#input_ident) -> Result<(), Vec<String>> {
+                    Ok(())
+                }
+            }
+        })
+    }
 }
 
 impl Default for RustCodeGenerator {
