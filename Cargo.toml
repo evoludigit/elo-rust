@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["FraiseQL Project"]
 description = "Rust code generation target for ELO validation language"
 license = "MIT"
-repository = "https://github.com/blambeau/elo"
+repository = "https://github.com/evoludigit/elo-rust"
 keywords = ["validation", "elo", "code-generation", "rust"]
 categories = ["development-tools::procedural-macro-helpers"]
 

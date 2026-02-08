@@ -1,0 +1,65 @@
+# Cargo-release configuration
+# This file configures how cargo-release handles versioning and publishing
+
+[changelog]
+# The template for changelog entries
+template = "<!-- Release notes will be inserted here -->"
+
+# File to update when creating releases
+filename = "CHANGELOG.md"
+
+# The header format for new versions
+header_template = "## {{version}} - {{date}}"
+
+# Include unreleased changes
+include_commit_body = true
+
+[publish]
+# Registry to publish to (crates.io)
+registry = "crates.io"
+
+# Allow dirty working directory (useful in CI)
+allow-dirty = true
+
+# Verify the package before publishing
+verify = true
+
+# Tag the release
+tag-template = "v{{version}}"
+
+# Push tags to remote
+push = true
+
+# Pre-release checks
+pre-release-replacements = [
+  { file="Cargo.toml", search="version = \"{current_version}\"", replace="version = \"{{version}}\"" },
+]
+
+[git]
+# Commit message template for version bumps
+conventional_commit = true
+
+# Allow running hooks
+allow_branch = ["main", "master"]
+
+# Tags to push
+push_options = []
+
+[workspace]
+# Whether to manage workspace members together
+allow_branch = ["main"]
+
+# Dry run mode (for testing)
+# dry_run = true
+
+[pre-release-hook]
+# Hook to run before releasing (optional)
+# Uncomment to enable pre-release testing
+# enable = true
+# script = "./scripts/pre-release.sh"
+
+[post-release-hook]
+# Hook to run after releasing (optional)
+# Uncomment to enable post-release notifications
+# enable = true
+# script = "./scripts/post-release.sh"

@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # Enable version updates for Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "evoludigit"
+    labels:
+      - "dependencies"
+      - "rust"
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Don't update major versions automatically
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-scope: "dependencies"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "evoludigit"
+    labels:
+      - "ci"
+      - "github-actions"
+    commit-message:
+      prefix: "ci(gh-actions)"
+      include: "scope"
