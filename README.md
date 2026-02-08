@@ -338,7 +338,7 @@ Contributions are welcome! Please ensure:
 ## Support
 
 For issues, questions, or contributions, please visit:
-https://github.com/blambeau/elo
+https://github.com/enspirit/elo
 
 ---
 

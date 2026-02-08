@@ -1,7 +1,7 @@
 # PR Readiness Checklist: ELO Rust Target
 
 **Audit Date**: February 8, 2026
-**Target Repository**: https://github.com/blambeau/elo
+**Target Repository**: https://github.com/enspirit/elo
 **PR Type**: Feature: Rust code generation target
 
 ---
@@ -540,7 +540,7 @@ Adds a complete Rust code generation target for ELO expressions.
 
 **Status**: ✅ **READY FOR SUBMISSION**
 
-**Recommended Action**: Submit PR to https://github.com/blambeau/elo immediately.
+**Recommended Action**: Submit PR to https://github.com/enspirit/elo immediately.
 
 **Expected Outcome**: PR review and integration to upstream ELO project.
 
