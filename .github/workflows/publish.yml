@@ -9,6 +9,10 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   verify:
     name: Verify Release
@@ -41,6 +45,8 @@ jobs:
     name: Publish to crates.io
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
