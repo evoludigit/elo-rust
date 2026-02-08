@@ -10,6 +10,7 @@ pub mod operators;
 pub mod types;
 
 pub use errors::CodeGenError;
+pub use operators::{BinaryOp, OperatorGenerator, UnaryOp};
 
 use proc_macro2::TokenStream;
 use quote::quote;

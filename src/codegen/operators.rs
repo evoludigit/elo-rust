@@ -1,8 +1,11 @@
 //! Binary and unary operator code generation
 
 use proc_macro2::TokenStream;
+use quote::quote;
 
 /// Represents a binary operator
+///
+/// Supports all common comparison, arithmetic, and logical operators.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryOp {
     /// Equality (==)
@@ -34,6 +37,8 @@ pub enum BinaryOp {
 }
 
 /// Represents a unary operator
+///
+/// Supports logical negation and numeric negation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     /// Logical NOT (!)
@@ -43,7 +48,9 @@ pub enum UnaryOp {
 }
 
 /// Generates code for operators
-#[derive(Debug)]
+///
+/// Provides methods for generating Rust code for binary and unary operations.
+#[derive(Debug, Clone)]
 pub struct OperatorGenerator;
 
 impl OperatorGenerator {
@@ -53,15 +60,49 @@ impl OperatorGenerator {
     }
 
     /// Generate code for a binary operation
-    pub fn binary(&self, _op: BinaryOp, _left: TokenStream, _right: TokenStream) -> TokenStream {
-        // Phase 2 implementation
-        quote::quote!()
+    ///
+    /// # Arguments
+    ///
+    /// * `op` - The operator to apply
+    /// * `left` - The left operand as a TokenStream
+    /// * `right` - The right operand as a TokenStream
+    ///
+    /// # Returns
+    ///
+    /// A `TokenStream` representing the binary operation
+    pub fn binary(&self, op: BinaryOp, left: TokenStream, right: TokenStream) -> TokenStream {
+        match op {
+            BinaryOp::Equal => quote! { #left == #right },
+            BinaryOp::NotEqual => quote! { #left != #right },
+            BinaryOp::Less => quote! { #left < #right },
+            BinaryOp::LessEqual => quote! { #left <= #right },
+            BinaryOp::Greater => quote! { #left > #right },
+            BinaryOp::GreaterEqual => quote! { #left >= #right },
+            BinaryOp::Add => quote! { #left + #right },
+            BinaryOp::Subtract => quote! { #left - #right },
+            BinaryOp::Multiply => quote! { #left * #right },
+            BinaryOp::Divide => quote! { #left / #right },
+            BinaryOp::Modulo => quote! { #left % #right },
+            BinaryOp::And => quote! { #left && #right },
+            BinaryOp::Or => quote! { #left || #right },
+        }
     }
 
     /// Generate code for a unary operation
-    pub fn unary(&self, _op: UnaryOp, _operand: TokenStream) -> TokenStream {
-        // Phase 2 implementation
-        quote::quote!()
+    ///
+    /// # Arguments
+    ///
+    /// * `op` - The unary operator to apply
+    /// * `operand` - The operand as a TokenStream
+    ///
+    /// # Returns
+    ///
+    /// A `TokenStream` representing the unary operation
+    pub fn unary(&self, op: UnaryOp, operand: TokenStream) -> TokenStream {
+        match op {
+            UnaryOp::Not => quote! { !#operand },
+            UnaryOp::Negate => quote! { -#operand },
+        }
     }
 }
 
