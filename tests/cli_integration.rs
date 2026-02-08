@@ -9,7 +9,14 @@ use std::process::Command;
 /// Helper function to get the compiled binary path
 fn get_binary_path() -> PathBuf {
     let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    path.push("target/debug/elo");
+    path.push("target/debug");
+
+    #[cfg(windows)]
+    path.push("elo.exe");
+
+    #[cfg(not(windows))]
+    path.push("elo");
+
     path
 }
 
