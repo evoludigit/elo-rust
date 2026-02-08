@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3](https://github.com/evoludigit/elo-rust/compare/v0.3.2...v0.3.3) (2026-02-08)
+
+### Bug Fixes
+
+* resolve remaining security workflow issues ([25992ee](https://github.com/evoludigit/elo-rust/commit/25992ee252f63860433decee6e7b3ac16785863a))
+* simplify cargo-deny to bans and sources checks ([c93ee92](https://github.com/evoludigit/elo-rust/commit/c93ee92541c2c14b1ede47e0a75f76944da389a9))
+
 ## [0.3.2](https://github.com/evoludigit/elo-rust/compare/v0.3.1...v0.3.2) (2026-02-08)
 
 ### Bug Fixes
