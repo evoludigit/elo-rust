@@ -14,6 +14,7 @@
 
 pub mod codegen;
 pub mod runtime;
+pub mod security;
 pub mod stdlib;
 
 pub use codegen::RustCodeGenerator;

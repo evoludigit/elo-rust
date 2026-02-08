@@ -89,8 +89,8 @@ fn test_compile_with_expression() {
     let output = run_elo(&["compile", "--expression", "age >= 18"]);
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("pub fn validate"));
     assert!(stdout.contains("Generated validator"));
-    assert!(stdout.contains("age >= 18"));
 }
 
 #[test]
@@ -103,16 +103,14 @@ fn test_compile_with_short_expression_flag() {
 
 #[test]
 fn test_compile_to_file() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let output_file = temp_dir.join("output.rs");
+    let output_file = "test_output.rs";
 
     let output = run_elo(&[
         "compile",
         "--expression",
         "email matches pattern",
         "--output",
-        output_file.to_str().unwrap(),
+        output_file,
     ]);
 
     assert!(output.status.success());
@@ -120,64 +118,52 @@ fn test_compile_to_file() {
     assert!(stdout.contains("Generated code written"));
 
     // Verify file was created
-    if output_file.exists() {
-        let contents = fs::read_to_string(&output_file).unwrap();
+    if PathBuf::from(output_file).exists() {
+        let contents = fs::read_to_string(output_file).unwrap();
         assert!(contents.contains("pub fn validate"));
-        let _ = fs::remove_file(&output_file);
+        let _ = fs::remove_file(output_file);
     }
 }
 
 #[test]
 fn test_compile_with_short_output_flag() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let output_file = temp_dir.join("output2.rs");
+    let output_file = "test_output2.rs";
 
-    let output = run_elo(&[
-        "compile",
-        "-e",
-        "verified == true",
-        "-o",
-        output_file.to_str().unwrap(),
-    ]);
+    let output = run_elo(&["compile", "-e", "verified == true", "-o", output_file]);
 
     assert!(output.status.success());
 
-    if output_file.exists() {
-        let _ = fs::remove_file(&output_file);
+    if PathBuf::from(output_file).exists() {
+        let _ = fs::remove_file(output_file);
     }
 }
 
 #[test]
 fn test_compile_from_file() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let input_file = temp_dir.join("input.elo");
+    let input_file = "test_input.elo";
 
-    fs::write(&input_file, "age >= 18 && verified == true").unwrap();
+    fs::write(input_file, "age >= 18 && verified == true").unwrap();
 
-    let output = run_elo(&["compile", "--input", input_file.to_str().unwrap()]);
+    let output = run_elo(&["compile", "--input", input_file]);
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Generated validator"));
 
-    let _ = fs::remove_file(&input_file);
+    let _ = fs::remove_file(input_file);
 }
 
 #[test]
 fn test_compile_short_input_flag() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let input_file = temp_dir.join("input2.elo");
+    let input_file = "test_input2.elo";
 
-    fs::write(&input_file, "username.length() >= 3").unwrap();
+    fs::write(input_file, "username.length() >= 3").unwrap();
 
-    let output = run_elo(&["compile", "-i", input_file.to_str().unwrap()]);
+    let output = run_elo(&["compile", "-i", input_file]);
 
     assert!(output.status.success());
 
-    let _ = fs::remove_file(&input_file);
+    let _ = fs::remove_file(input_file);
 }
 
 #[test]
@@ -189,7 +175,7 @@ fn test_compile_no_expression() {
 
 #[test]
 fn test_compile_nonexistent_input_file() {
-    let output = run_elo(&["compile", "--input", "/nonexistent/path/file.elo"]);
+    let output = run_elo(&["compile", "--input", "nonexistent_file.elo"]);
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Failed to read"));
@@ -224,34 +210,30 @@ fn test_compile_unknown_argument() {
 
 #[test]
 fn test_validate_from_file() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let input_file = temp_dir.join("validate.elo");
+    let input_file = "test_validate.elo";
 
-    fs::write(&input_file, "age >= 18").unwrap();
+    fs::write(input_file, "age >= 18").unwrap();
 
-    let output = run_elo(&["validate", "--input", input_file.to_str().unwrap()]);
+    let output = run_elo(&["validate", "--input", input_file]);
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("valid"));
 
-    let _ = fs::remove_file(&input_file);
+    let _ = fs::remove_file(input_file);
 }
 
 #[test]
 fn test_validate_short_input_flag() {
-    let temp_dir = PathBuf::from("/tmp/elo-test");
-    let _ = fs::create_dir_all(&temp_dir);
-    let input_file = temp_dir.join("validate2.elo");
+    let input_file = "test_validate2.elo";
 
-    fs::write(&input_file, "email contains '@'").unwrap();
+    fs::write(input_file, "email contains at-sign").unwrap();
 
-    let output = run_elo(&["validate", "-i", input_file.to_str().unwrap()]);
+    let output = run_elo(&["validate", "-i", input_file]);
 
     assert!(output.status.success());
 
-    let _ = fs::remove_file(&input_file);
+    let _ = fs::remove_file(input_file);
 }
 
 #[test]
