@@ -27,6 +27,10 @@ name = "axum_validator"
 path = "examples/axum_validator.rs"
 required-features = ["serde-support"]
 
+[[bin]]
+name = "elo"
+path = "src/bin/elo.rs"
+
 [dependencies]
 # AST and parsing support
 proc-macro2 = "1.0"
