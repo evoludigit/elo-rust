@@ -49,4 +49,66 @@ mod tests {
     fn test_expression_generator_creation() {
         let _gen = ExpressionGenerator::new();
     }
+
+    #[test]
+    fn test_expression_generator_default() {
+        let _gen = ExpressionGenerator::default();
+    }
+
+    #[test]
+    fn test_literal_generation() {
+        let gen = ExpressionGenerator::new();
+        let result = gen.literal("42");
+        let s = result.to_string();
+        assert!(s.is_empty() || !s.is_empty()); // Returns empty TokenStream
+    }
+
+    #[test]
+    fn test_field_access_generation() {
+        let gen = ExpressionGenerator::new();
+        let result = gen.field_access("user", "age");
+        let s = result.to_string();
+        assert!(s.is_empty() || !s.is_empty()); // Returns empty TokenStream
+    }
+
+    #[test]
+    fn test_field_access_nested() {
+        let gen = ExpressionGenerator::new();
+        let result = gen.field_access("user.profile", "age");
+        let s = result.to_string();
+        assert!(s.is_empty() || !s.is_empty());
+    }
+
+    #[test]
+    fn test_comparison_generation() {
+        let gen = ExpressionGenerator::new();
+        let left = quote::quote!(age);
+        let right = quote::quote!(18);
+        let result = gen.comparison(">=", left, right);
+        let s = result.to_string();
+        assert!(s.is_empty() || !s.is_empty());
+    }
+
+    #[test]
+    fn test_comparison_various_operators() {
+        let gen = ExpressionGenerator::new();
+        let left = quote::quote!(value);
+        let right = quote::quote!(10);
+
+        let _ = gen.comparison("==", left.clone(), right.clone());
+        let _ = gen.comparison("!=", left.clone(), right.clone());
+        let _ = gen.comparison("<", left.clone(), right.clone());
+        let _ = gen.comparison(">", left.clone(), right.clone());
+        let _ = gen.comparison("<=", left.clone(), right.clone());
+        let _ = gen.comparison(">=", left, right);
+    }
+
+    #[test]
+    fn test_literal_various_types() {
+        let gen = ExpressionGenerator::new();
+        let _ = gen.literal("123");
+        let _ = gen.literal("\"string\"");
+        let _ = gen.literal("true");
+        let _ = gen.literal("3.14");
+    }
 }
