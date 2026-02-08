@@ -12,7 +12,9 @@
 //! enabling developers to compile ELO validation expressions directly to type-safe,
 //! zero-overhead Rust functions.
 
+pub mod ast;
 pub mod codegen;
+pub mod parser;
 pub mod runtime;
 pub mod security;
 pub mod stdlib;

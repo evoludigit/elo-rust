@@ -3,15 +3,20 @@
 //! This module provides the core code generation engine that transforms ELO AST
 //! into idiomatic Rust code via the `quote!` macro.
 
+pub mod ast_to_code;
 pub mod errors;
 pub mod expressions;
 pub mod functions;
 pub mod operators;
+pub mod optimization;
+pub mod temporal;
+pub mod type_inference;
 pub mod types;
 
 pub use errors::CodeGenError;
 pub use operators::{BinaryOp, OperatorGenerator, UnaryOp};
 
+use crate::ast::visitor::Visitor;
 use proc_macro2::TokenStream;
 use quote::quote;
 
@@ -174,7 +179,7 @@ impl RustCodeGenerator {
     /// # Arguments
     ///
     /// * `name` - The name of the validator function
-    /// * `_elo_expr` - The ELO validation expression
+    /// * `elo_expr` - The ELO validation expression
     /// * `input_type` - The type being validated
     ///
     /// # Returns
@@ -183,18 +188,29 @@ impl RustCodeGenerator {
     pub fn generate_validator(
         &self,
         name: &str,
-        _elo_expr: &str,
+        elo_expr: &str,
         input_type: &str,
     ) -> Result<TokenStream, String> {
+        // Parse the ELO expression
+        let ast = crate::parser::Parser::parse(elo_expr)
+            .map_err(|e| format!("Parse error: {}", e))?;
+
+        // Generate code via visitor
+        let mut visitor = ast_to_code::CodegenVisitor::new();
+        let validation_code = visitor.visit_expr(&ast);
+
+        // Wrap in function
         let fn_name = quote::format_ident!("{}", name);
         let input_ident = quote::format_ident!("{}", input_type);
 
-        // For now, generate a basic validator structure
-        // In a full implementation, this would parse the ELO expression
-        // and generate appropriate validation code
         Ok(quote! {
             pub fn #fn_name(input: &#input_ident) -> Result<(), Vec<String>> {
-                Ok(())
+                let result = #validation_code;
+                if result {
+                    Ok(())
+                } else {
+                    Err(vec!["Validation failed".to_string()])
+                }
             }
         })
     }

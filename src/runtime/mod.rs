@@ -1,6 +1,12 @@
 //! Runtime support for validation
 //!
-//! Provides error types and utilities for generated validators
+//! Provides error types, utilities, and dynamic value representation for generated validators
+
+pub mod value;
+pub mod temporal;
+
+pub use value::EloValue;
+pub use temporal::TemporalValue;
 
 use std::fmt;
 
