@@ -10,6 +10,8 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/ci.yml'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/publish.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
