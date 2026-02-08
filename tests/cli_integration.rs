@@ -191,10 +191,10 @@ fn test_compile_nonexistent_input_file() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     // Error message differs by platform, check for key error indicators
     assert!(
-        stderr.contains("Failed to read") ||
-        stderr.contains("No such file") ||
-        stderr.contains("cannot find") ||
-        stderr.contains("error")
+        stderr.contains("Failed to read")
+            || stderr.contains("No such file")
+            || stderr.contains("cannot find")
+            || stderr.contains("error")
     );
 }
 
