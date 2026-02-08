@@ -51,8 +51,8 @@ mod tests {
     }
 
     #[test]
-    fn test_expression_generator_default() {
-        let _gen = ExpressionGenerator::default();
+    fn test_expression_generator_new() {
+        let _gen = ExpressionGenerator::new();
     }
 
     #[test]

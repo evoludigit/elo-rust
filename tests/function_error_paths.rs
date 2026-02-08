@@ -373,8 +373,8 @@ fn test_multiple_generator_instances_are_independent() {
 }
 
 #[test]
-fn test_default_instance() {
-    let gen = FunctionGenerator::default();
+fn test_new_instance() {
+    let gen = FunctionGenerator::new();
     let text = quote::quote!(data);
     let result = gen.string_function("trim", vec![text]);
     let s = result.to_string();
